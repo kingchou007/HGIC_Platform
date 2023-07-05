@@ -1,0 +1,32 @@
+{
+    "Navigation": {
+        "2": "up",
+        "12": "down",
+        "4": "left",
+        "5": "right",
+        "6": "forward",
+        "7": "backward"
+    },
+    "Formation Control": {
+        "0": "spread",
+        "1": "merge"
+    },
+    "Task Control": {
+        "12": "search",
+        "11": "cover",
+        "10": "Chase"
+    },
+    "Emergency": {
+        "15": "stop"
+    },
+    "Configuration": {
+        "11": "split",
+        "14": "three",
+        "2": "add",
+        "12": "delete"
+    },
+    "Universal": {
+        "8": "take off",
+        "9": "land"
+    }
+}

@@ -3,7 +3,9 @@ import socket
 from hand_detection import HandDetector
 from hand_classification import HandClassifier
 from utils import CvFpsCalc
+from draw import Draw
 from hand_cmd import GestureCommandProcessor
+
 
 # Connection settings
 def send_Message(message, UDP_IP, UDP_PORT):
@@ -21,6 +23,8 @@ def main():
     
     # Create instance of GestureCommandProcessor
     cmd_process = GestureCommandProcessor()
+    
+    draw = Draw()
 
     # Initialize other variables and settings
     point_history = []
@@ -29,11 +33,13 @@ def main():
     cap = cv.VideoCapture(0)
     
     # FPS calculation
-    fps = CvFpsCalc()
+    
+    cvFpsCalc = CvFpsCalc(buffer_len=10)
 
     while True:
-        ret, frame = cap.read()
-
+        fps = cvFpsCalc.get() # FPS calculation
+        ret, frame = cap.read() # Read frame
+        
         if ret:
             # Hand detection
             landmarks, bboxes, results = hand_detector.detect(frame)  # detect hands in the frame
@@ -54,10 +60,12 @@ def main():
  
             # print(command)
             
-            
-            
-            
-            
+            # User interface
+            draw.real_time_score(frame, bboxes, command, confidence_score)
+            draw.show_fps(frame, fps)
+            draw.gesture_UI(frame, mode, command)
+            draw.swarm_UI(frame, hand_sign_id, hand_sign_id, hand_sign_id)
+            # print(mode)
             # Send message to controller
             # if True:
             #     send_Message(hand_sign_id, UDP_IP="127.0.0.1", UDP_PORT=5000)
@@ -72,7 +80,7 @@ def main():
 
             # Display results or perform actions based on the classification
 
-            cv.imshow("Hand Gesture Recognition", frame)
+            cv.imshow("Hand Gesture Based Interactive UAVs Control (HGI) Platform", frame)
         else:
             break
 

@@ -21,6 +21,7 @@ class GestureCommandProcessor:
         self.switch_buffer = deque(maxlen=25)
         self.frames_since_last_switch = 0  # Counter for frames since last mode switch
 
+
     def switch_mode(self, hand_sign_id):
         switch_mode_sign_id = 3  # the sign_id for switching modes
         # Add the current hand sign to the buffer
@@ -53,8 +54,6 @@ class GestureCommandProcessor:
 
         if current_mode_command != "none":
             print(f"Executing command: '{current_mode_command}' in mode: '{self.current_mode}'")
-        # else:
-        #     print("No matching command found.")
 
         return current_mode_command
                 

@@ -49,6 +49,7 @@ class HandDetector:
                     landmark_list.append([landmark_x, landmark_y])
                 landmarks.append(landmark_list)
                 bboxes.append(self.calc_bounding_rect(image, hand_landmarks))
+                # brect = calc_bounding_rect(debug_image, hand_landmarks)
 
         return landmarks, bboxes, results
     
@@ -76,7 +77,4 @@ class HandDetector:
                     self.connection_drawing_spec    # connection drawing spec
                 )
     
-    def draw_text(self, image, text, position, color):
-        cv.putText(image, text, position, cv.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv.LINE_AA)
 
-            

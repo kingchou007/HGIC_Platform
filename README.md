@@ -1,6 +1,6 @@
 # HGI_Platform
 
-hand_recogonition/
+hand_recognition/
 ├── model/
 │   ├── static/
 │   │   ├── static_label.csv
@@ -15,3 +15,4 @@ hand_recogonition/
 ├── hand_classification.py
 ├── process_cmd.py
 └── main.py
+

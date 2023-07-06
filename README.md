@@ -1,5 +1,6 @@
 # HGI_Platform
 
+\begin{verbatim}
 hand_recognition/
 ├── model/
 │   ├── static/
@@ -15,4 +16,4 @@ hand_recognition/
 ├── hand_classification.py
 ├── process_cmd.py
 └── main.py
-
+\end{verbatim}

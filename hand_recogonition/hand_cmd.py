@@ -43,17 +43,23 @@ class GestureCommandProcessor:
     # Execute the corresponding command based on the hand_sign_id and current mode.
     def execute_command(self, hand_sign_id):
         # Check for emergency commands first since they have the highest priority
-        emergency_command = self.command_dict.get("Emergency", {}).get(str(hand_sign_id), None)
+        emergency_command = self.command_dict.get("Emergency", {}).get(str(hand_sign_id), None)  #TODO: not work check
         if emergency_command is not None:
             print(f"Executing emergency command: '{emergency_command}'")
             return emergency_command
-
-        # If the hand sign does not correspond to an emergency command,
-        # then find the command in the current mode
+        
+        # Check for universal commands
+        universal_command = self.command_dict.get("Universal", {}).get(str(hand_sign_id), None)
+        if universal_command is not None:
+            print(f"Executing universal command: '{universal_command}'")
+            return universal_command
+            
         current_mode_command = self.command_dict.get(self.current_mode, {}).get(str(hand_sign_id), "none")
 
-        if current_mode_command != "none":
-            print(f"Executing command: '{current_mode_command}' in mode: '{self.current_mode}'")
-
+        # if current_mode_command != "none":
+            #print(f"Executing command: '{current_mode_command}' in mode: '{self.current_mode}'")
         return current_mode_command
+    
+    def get_current_mode(self):
+        return self.current_mode
                 

@@ -18,7 +18,8 @@ class HandDetector:
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence,
         )
-        self.mp_drawing = mp.solutions.drawing_utils    # hand detection
+        
+        self.mp_drawing = mp.solutions.drawing_utils # hand detection
         
         # visualizing the hand landmarks and connections on the image    
         self.landmark_drawing_spec = self.mp_drawing.DrawingSpec(color=(255, 0, 0), 
@@ -34,24 +35,23 @@ class HandDetector:
         image.flags.writeable = False        # image is no longer writeable to improve performance
         results = self.hands.process(image)  # process the image
         image.flags.writeable = True         # image is now writeable again
-
-        landmarks = []  # a list of landmarks for the detected hands
-        bboxes = []     # a list of bounding boxes for the detected hands
+        bboxes, landmarks, dy_landmark_list = [], [], []
         
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 landmark_list = []
-                
                 # Get the bounding box of the hand
                 for landmark in hand_landmarks.landmark:
                     landmark_x = min(int(landmark.x * image.shape[1]), image.shape[1] - 1)
                     landmark_y = min(int(landmark.y * image.shape[0]), image.shape[0] - 1)
                     landmark_list.append([landmark_x, landmark_y])
+                # Get the dynamic landmarks
+                dy_landmark_list = landmark_list
+                # Get the bounding box of the hand
                 landmarks.append(landmark_list)
                 bboxes.append(self.calc_bounding_rect(image, hand_landmarks))
-                # brect = calc_bounding_rect(debug_image, hand_landmarks)
 
-        return landmarks, bboxes, results
+        return landmarks, bboxes, results, dy_landmark_list
     
     def calc_bounding_rect(self, image, landmarks):
         image_width, image_height = image.shape[1], image.shape[0]
@@ -60,7 +60,7 @@ class HandDetector:
         x, y, w, h = cv.boundingRect(landmark_array)
         
         return [x, y, x + w, y + h]
-            
+ 
     def draw_bounding_rect(self, image, bboxes):
         for bbox in bboxes:
             x1, y1, x2, y2 = bbox

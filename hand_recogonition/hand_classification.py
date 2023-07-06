@@ -2,6 +2,7 @@ import csv
 import copy
 import itertools
 from model import KeyPointClassifier, PointHistoryClassifier
+from collections import Counter
 
 class HandClassifier:
     def __init__(self, 
@@ -22,20 +23,27 @@ class HandClassifier:
 
         return None, None
 
-    def dynamic_classify(self, point_history, image):
-        point_history_ids = []
-
+    def dynamic_classify(self, point_history, image, history_length=16):
         if point_history:
+            finger_gesture_id = 0
             pre_processed_point_history_list = self.pre_process_point_history(image, point_history)
-            point_history_id = self.point_history_classifier(pre_processed_point_history_list)
-            point_history_ids.append(point_history_id)
-
-        return point_history_ids
+            point_history_len = len(pre_processed_point_history_list)
+            
+            if point_history_len == (history_length * 2):
+                finger_gesture_id = self.point_history_classifier(pre_processed_point_history_list)
+            return finger_gesture_id
+        return None
     
+    def process_dynamic_gesture(self, most_common_fg_id):
+        cmd = self.point_history_classifier_labels[most_common_fg_id[0][0]]
+        
+        return cmd
+
     def load_labels(self, file_path):
         with open(file_path, encoding='utf-8-sig') as f:
             labels = csv.reader(f)
             labels = [row[0] for row in labels]
+            
         return labels
 
     def pre_process_landmark(self, landmark_list):
@@ -50,12 +58,11 @@ class HandClassifier:
             temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y
 
         temp_landmark_list = list(itertools.chain.from_iterable(temp_landmark_list))
-
         max_value = max(list(map(abs, temp_landmark_list)))
-
-        def normalize_(n):
+        
+        def normalize_(n): 
             return n / max_value
-
+        
         temp_landmark_list = list(map(normalize_, temp_landmark_list))
 
         return temp_landmark_list

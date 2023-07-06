@@ -2,31 +2,34 @@
     "Navigation": {
         "2": "up",
         "12": "down",
-        "4": "left",
-        "5": "right",
-        "6": "forward",
-        "7": "backward"
+        "4": "forward",
+        "5": "backward",
+        "6": "left",
+        "7": "right"
     },
     "Formation Control": {
         "0": "spread",
-        "1": "merge"
+        "1": "merge",
+        "2": "",
+        "16": ""
     },
     "Task Control": {
-        "12": "search",
-        "11": "cover",
-        "10": "Chase"
+        "11": "search",
+        "10": "cover",
+        "9": "chase"
     },
     "Emergency": {
         "15": "stop"
     },
     "Configuration": {
-        "11": "split",
-        "14": "three",
+        "10": "split",
+        "13": "three",
         "2": "add",
-        "12": "delete"
+        "12": "delete",
+        "0": "all"
     },
     "Universal": {
         "8": "take off",
-        "9": "land"
+        "14": "land"
     }
 }

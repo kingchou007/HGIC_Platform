@@ -7,8 +7,7 @@ hand_recognition/
 │   └── dynamic/
 │       ├── dynamic.csv
 │       └── dynamic.tflite
-├── utils/
-│   └── fps.py
+├── fps.py
 ├── cmd_settings.json
 ├── hand_detection.py
 ├── hand_classification.py

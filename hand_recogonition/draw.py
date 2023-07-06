@@ -14,27 +14,25 @@ class Draw():
             
             # Display the information text on the image
             if x1 >= 0 and y1 >= 0:
-                cv.putText(image, info_text, (x1 + 5, y1 - 10), cv.FONT_HERSHEY_SIMPLEX, 0.6, 
-                           (255, 255, 255), 1, cv.LINE_AA)
+                cv.putText(image, info_text, (x1 + 5, y1 - 10), 
+                           cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
     
     def gesture_UI(self, image, mode, command):
         x = 10  # Left-aligned
         y_mode = 30  # Distance from the top for mode text
         y_command = 60  # Distance from the top for command text
         
-        # Display the mode text TODO: Change the color of the text
-        cv.putText(image, f"Current Mode: {mode}", (x, y_mode), cv.FONT_HERSHEY_SIMPLEX, 
-                   1.0, (0, 0, 0), 4, cv.LINE_AA)
-        
-        cv.putText(image, f"Current Mode: {mode}", (x, y_mode), cv.FONT_HERSHEY_SIMPLEX, 
-                   1.0, (255, 255, 255), 2, cv.LINE_AA)
+        # Display the mode text
+        cv.putText(image, f"Current Mode: {mode}", (x, y_mode), 
+                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 4, cv.LINE_AA)
+        cv.putText(image, f"Current Mode: {mode}", (x, y_mode), 
+                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2, cv.LINE_AA)
         
         # Display the command text
-        cv.putText(image, f"Current Command: {command}", (x, y_command), cv.FONT_HERSHEY_SIMPLEX, 
-                   1.0, (0, 0, 0), 4, cv.LINE_AA)
-        
-        cv.putText(image, f"Current Command: {command}", (x, y_command), cv.FONT_HERSHEY_SIMPLEX, 
-                   1.0, (255, 255, 255), 2, cv.LINE_AA)
+        cv.putText(image, f"Current Command: {command}", (x, y_command), 
+                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 4, cv.LINE_AA)
+        cv.putText(image, f"Current Command: {command}", (x, y_command), 
+                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2, cv.LINE_AA)
 
     def swarm_UI(self, image, swarm_status, current_task, task_progress):
         x = image.shape[1] - 320  # Right-aligned
@@ -43,23 +41,20 @@ class Draw():
         y_progress = 90  # Distance from the top for task progress text
         
         # Display swarm status text
-        cv.putText(image, f"Swarm: {swarm_status}", (x, y_swarm), cv.FONT_HERSHEY_SIMPLEX, 
-                   1.0, (255, 0, 0), 4, cv.LINE_AA)
-        
-        cv.putText(image, f"Swarm: {swarm_status}", (x, y_swarm), cv.FONT_HERSHEY_SIMPLEX, 
-                   1.0, (255, 255, 255), 2, cv.LINE_AA)
+        cv.putText(image, f"Swarm: {swarm_status}", (x, y_swarm), 
+                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 4, cv.LINE_AA)
+        cv.putText(image, f"Swarm: {swarm_status}", (x, y_swarm), 
+                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2, cv.LINE_AA)
         
         # Display current task text
         cv.putText(image, f"Status: {current_task}", (x, y_task), 
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 4, cv.LINE_AA)
-        
         cv.putText(image, f"Status: {current_task}", (x, y_task), 
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2, cv.LINE_AA)
         
         # Display task progress text
         cv.putText(image, f"Progress: {task_progress}", (x, y_progress), 
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 4, cv.LINE_AA)
-        
         cv.putText(image, f"Progress: {task_progress}", (x, y_progress), 
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2, cv.LINE_AA)
 

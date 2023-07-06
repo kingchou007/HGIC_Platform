@@ -14,7 +14,6 @@ def send_Message(message, UDP_IP, UDP_PORT):
     udp_socket.sendto(message.encode(), (UDP_IP, UDP_PORT))
     udp_socket.close()
 
-
 def main():
     # Create instances
     hand_detector = HandDetector()
@@ -75,7 +74,7 @@ def main():
             current = prev_mode
             
         # Send message to the server
-        send_Message(cmd, UDP_IP="127.0.0.1", UDP_PORT=5000)
+        # send_Message(cmd, UDP_IP="127.0.0.1", UDP_PORT=5000)
 
         # Draw on the frame #TODO
         draw.real_time_score(frame, bboxes, cmd, score) 

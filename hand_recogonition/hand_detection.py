@@ -19,20 +19,23 @@ class HandDetector:
             min_tracking_confidence=min_tracking_confidence,
         )
         
-        self.mp_drawing = mp.solutions.drawing_utils # hand detection
-        
-        # visualizing the hand landmarks and connections on the image    
-        self.landmark_drawing_spec = self.mp_drawing.DrawingSpec(color=(255, 0, 0), 
-                                                                 thickness=3, 
-                                                                 circle_radius=2)
-        
-        self.connection_drawing_spec = self.mp_drawing.DrawingSpec(color=(0, 255, 0), 
-                                                                   thickness=3, 
-                                                                   circle_radius=2) 
+        # drawing utilities
+        self.mp_drawing = mp.solutions.drawing_utils
+        self.landmark_drawing_spec = self.mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=3, circle_radius=2)
+        self.connection_drawing_spec = self.mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=3, circle_radius=2) 
     
     def detect(self, image):
+        """
+        Detect hands in the given image.
+
+        Args:
+            image (np.ndarray): The input image.
+
+        Returns:
+            Tuple: A tuple containing the landmarks, bounding boxes, results, and dynamic landmark list.
+        """
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-        image.flags.writeable = False        # image is no longer writeable to improve performance
+        image.flags.writeable = False       
         results = self.hands.process(image)  # process the image
         image.flags.writeable = True         # image is now writeable again
         bboxes, landmarks, dy_landmark_list = [], [], []
@@ -45,15 +48,23 @@ class HandDetector:
                     landmark_x = min(int(landmark.x * image.shape[1]), image.shape[1] - 1)
                     landmark_y = min(int(landmark.y * image.shape[0]), image.shape[0] - 1)
                     landmark_list.append([landmark_x, landmark_y])
-                # Get the dynamic landmarks
-                dy_landmark_list = landmark_list
-                # Get the bounding box of the hand
+                dy_landmark_list = landmark_list # Get the dynamic landmarks
                 landmarks.append(landmark_list)
                 bboxes.append(self.calc_bounding_rect(image, hand_landmarks))
 
         return landmarks, bboxes, results, dy_landmark_list
     
     def calc_bounding_rect(self, image, landmarks):
+        """
+        Calculate the bounding rectangle for a set of landmarks.
+
+        Args:
+            image (np.ndarray): The input image.
+            landmarks (List): List of landmark coordinates.
+
+        Returns:
+            List: Bounding rectangle coordinates [x1, y1, x2, y2].
+        """
         image_width, image_height = image.shape[1], image.shape[0]
         landmark_array = np.array([[int(landmark.x * image_width), 
                                     int(landmark.y * image_height)] for landmark in landmarks.landmark])
@@ -62,11 +73,28 @@ class HandDetector:
         return [x, y, x + w, y + h]
  
     def draw_bounding_rect(self, image, bboxes):
+        """
+        Draw bounding rectangles on the image.
+
+        Args:
+            image (np.ndarray): The input image.
+            bboxes (List): List of bounding box coordinates.
+        """
         for bbox in bboxes:
             x1, y1, x2, y2 = bbox
             cv.rectangle(image, (x1, y1), (x2, y2), (128,128,0), 2) # 0, 255, 0 = green
             
     def draw_landmarks(self, image, results):
+        """
+        Draw landmarks on the image.
+
+        Args:
+            image (np.ndarray): The input image.
+            results: Results from hand detection.
+
+        Returns:
+            List: List of bounding box coordinates.
+        """
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 self.mp_drawing.draw_landmarks(

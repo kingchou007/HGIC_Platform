@@ -11,7 +11,7 @@ from collections import deque, Counter
 # Connection settings
 def send_Message(message, UDP_IP, UDP_PORT):
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_socket.sendto(message.encode(), (UDP_IP, UDP_PORT))
+    udp_socket.sendto(message.encode('utf8'), (UDP_IP, UDP_PORT))
     udp_socket.close()
 
 def main():
@@ -69,13 +69,13 @@ def main():
                     cmd = command
 
             score, current, prev_mode = confidence_score, current_mode, current_mode
+            
+            # Send message to the control platform
+            send_Message(cmd, UDP_IP="127.0.0.1", UDP_PORT=5000)
         else:
             point_history.append([0, 0])
             current = prev_mode
             
-        # Send message to the server
-        # send_Message(cmd, UDP_IP="127.0.0.1", UDP_PORT=5000)
-
         # Draw on the frame #TODO
         draw.real_time_score(frame, bboxes, cmd, score) 
         draw.show_fps(frame, fps)

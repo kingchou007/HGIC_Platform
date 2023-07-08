@@ -3,18 +3,14 @@ import time
 import numpy as np
 import os
 
-##### build Connection #####
+# Build a connection with AirSim
 client = airsim.MultirotorClient()
 client.confirmConnection()
 
-##### 这是无人机的初始位置 #####
-origin_x = [0, 2, 4, 0, 2, 4, 0, 2, 4]  # initial x position of the UAVs
-origin_y = [0, 0, 0, -3, -2, -3, 3, 2, 3]  # initial y position of the UAVs
-
-
-# origin_z = [-3, -3, -3, -3, -3, -3, -3, -3, -3]  # initial z position of the UAVs
-# TODO: add inital parameters for the UAVs e.g: numbers
-
+# Initialize the UAVs position
+origin_x = [0, 2, 4, 0, 2, 4, 0, 2, 4]
+origin_y = [0, 0, 0, -3, -2, -3, 3, 2, 3]
+origin_z = []
 ##### 这是获取无人机位置的函数 ##### #TODO: think about x, y, z instaed
 def get_UAV_pos(client, vehicle_name="SimpleFlight"):
     global origin_x

@@ -19,7 +19,7 @@ COMMANDS = {
     "left": SwarmControl.left,
     "right": SwarmControl.right,
     "chase": SwarmControl.chasing,
-    "cover": SwarmControl.cover_block(),
+    "cover": SwarmControl.cover_block,
     "search": SwarmControl.spiral_motion,
     "NOP": SwarmControl.nop
 }

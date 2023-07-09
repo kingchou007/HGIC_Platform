@@ -316,9 +316,10 @@ def fly_circle():
     v_max = 2
     r_max = 5
     k_sep = 3  # Increase separation coefficient
-    k_rep = 10
+
     k_coh = 3  # Decrease cohesion coefficient
     k_mig = 1
+    k_rep = 10
     pos_mig = np.array([[25], [0]])
     v_cmd = np.zeros([2, 9])
 

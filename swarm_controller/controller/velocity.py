@@ -1,8 +1,8 @@
 import airsim
-import time
 import numpy as np
+from numba import jit
 
-class velocityComputation:
+class VelocityComputation():
     def __init__(self):
         # Build a connection with AirSim
         self.client = airsim.MultirotorClient()
@@ -18,8 +18,9 @@ class velocityComputation:
         self.origin_z = [] # most action will be in 2D plane
         
         self.num_uavs = len(self.origin) # can be selected from 1 to 9
-        
-    def set_parameters(self, v_max, r_max, k_sep, k_coh, k_mig, k_rep, r_repulsion, d_desired):
+          
+    def set_parameters(self, v_max=0, r_max=20, k_sep=0, k_coh=0, 
+                       k_mig=1, k_rep=0, r_repulsion=0, d_desired=0):
         self.v_max = v_max
         self.r_max = r_max
         self.k_sep = k_sep
@@ -28,6 +29,13 @@ class velocityComputation:
         self.r_repulsion = r_repulsion
         self.d_desired = d_desired
         self.k_rep = k_rep
+        
+        self.v_cmd = np.zeros([2, self.num_uavs])
+        self.v_rep = np.zeros([2, 1])
+        self.v_coh = np.zeros([2, 1])
+        self.v_sep = np.zeros([2, 1])
+        self.z_cmd = self.get_avg_altitude()
+        self.pos_mig = np.array([[0], [0]])
         
     def get_UAV_pos(self, vehicle_name="SimpleFlight"):
         state = self.client.simGetGroundTruthKinematics(vehicle_name=vehicle_name)
@@ -39,142 +47,194 @@ class velocityComputation:
         pos = np.array([[x], [y]]) # Return a 2D array
         return pos
 
-    def take_off(self):
-        for i in range(self.num_uavs):
-            name_i = "UAV" + str(i + 1)
-            self.client.enableApiControl(True, name_i)
-            self.client.armDisarm(True, name_i)
-            if i != self.num_uavs - 1:
-                self.client.takeoffAsync(vehicle_name=name_i)
-            else:
-                self.client.takeoffAsync(vehicle_name=name_i).join()
-        
-        time.sleep(0.5)
-        
-        # fly to same altitude
-        for i in range(self.num_uavs):
-            name = "UAV" + str(i + 1)
-            if i != self.num_uavs - 1:
-                self.client.moveToZAsync(-3, 1, vehicle_name=name)
-            else:
-                self.client.moveToZAsync(-3, 1, vehicle_name=name).join()
-                
-    def land(self):
-        for i in range(9):
-            name_i = "UAV"+str(i+1)
-            if i != self.num_uavs - 1: 
-                self.client.landAsync(vehicle_name=name_i)
-            else:
-                self.client.landAsync(vehicle_name=name_i).join()
-            
     def get_avg_altitude(self):
         # get current z position of all UAVs
-        swam_altitude = [self.client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in range(self.num_uavs)]
-        z_cmd = np.mean(swam_altitude)
-        return z_cmd
+        swarm_altitude = [
+            self.client.getMultirotorState(vehicle_name="UAV" + str(i + 1))
+            .kinematics_estimated.position.z_val for i in range(self.num_uavs)
+        ]
+        z_cmd = np.mean(swarm_altitude)
+        
+        return z_cmd   
     
-    def compute_velocity_command(self):
-        v_cmd = np.zeros([2, self.num_uavs])
-        z_cmd = self.get_avg_altitude()
-
-        for i in range(self.num_uavs):
-            name_i = "UAV"+str(i+1)
-            pos_i = self.get_UAV_pos(vehicle_name=name_i)
-            pos_mig = pos_i + self.shift
-            r_mig = pos_mig - pos_i
-            v_mig = self.k_mig * r_mig / np.linalg.norm(r_mig)
-            v_sep = np.zeros([2, 1])
-            v_coh = np.zeros([2, 1]) 
-            N_i = 0
-
-            for j in range(self.num_uavs):
-                if j != i:
-                    N_i += 1
-                    name_j = "UAV"+str(j+1)
-                    pos_j = self.get_UAV_pos(vehicle_name=name_j)
-                    if np.linalg.norm(pos_j - pos_i) < self.r_max:
-                        r_ij = pos_j - pos_i
-                        v_sep += -self.k_sep * r_ij / np.linalg.norm(r_ij)
-                        v_coh += self.k_coh * r_ij 
-
-            if N_i > 0:
-                v_sep = v_sep / N_i
-                v_coh = v_coh / N_i
-                
-            v_cmd[:, i] = (v_sep + v_coh + v_mig).flatten()
-            if v_cmd[0, i] > self.v_max:
-                v_cmd[0, i] = self.v_max
-
-        return v_cmd, z_cmd
-
-    
-    def get_vehicle_name(self, i):
-        return "UAV" + str(i + 1)
-    
-    def execute_for_all_uavs(self, func):
-        for i in range(self.num_uavs):
-            name_i = self.get_vehicle_name(i)
-            func(name_i)
-    
-    # used for left, right, forward, backward
-    def move_in_direction(self, shift, t=100):
-        self.shift = shift
-        for _ in range(t):
-            v_cmd, z_cmd = self.compute_velocity_command()
-            for i in range(self.num_uavs):
-                name_i = self.get_vehicle_name(i)
-                self.client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
-
-    # Compute Merge and spread velocity
     def get_swarm_center(self):
-        # get current position of all UAVs
+        # get center position of all UAVs
         temp_pos = []
         for i in range(self.num_uavs):
             name_i = "UAV"+str(i+1)
             temp_pos.append(self.get_UAV_pos(vehicle_name=name_i))
             
         return np.mean(temp_pos, axis=0)
-            
-    def compute_formation_velocities(self):
-        v_cmd = np.zeros([2, self.num_uavs])
-        z_cmd = self.get_avg_altitude()
+    
+    def compute_separation_force(self, pos_i, pos_j):
+        r_ij = pos_j - pos_i
+        distance = np.linalg.norm(r_ij)
+        if distance != 0:
+            return -self.k_sep * r_ij / distance
+        else:
+            return np.zeros(2)
+    
+    def compute_cohesion_force(self, pos_i, pos_j):
+        r_ij = pos_j - pos_i
+        return self.k_coh * r_ij
         
-        # find the center of swarm
-        pos_mig = self.get_swarm_center()
+    def compute_repulsion_force(self, pos_i, pos_j, repulsion_distance, safe_distance_uav, K_rep):
+        r_ij = pos_j - pos_i
+        distance = np.linalg.norm(r_ij)
 
+        if distance < repulsion_distance:
+            repulsion_vector = -K_rep * r_ij / distance
+            if distance < safe_distance_uav:
+                repulsion_vector *= 2
+        else:
+            repulsion_vector = np.zeros([2, 1])  # No repulsion force if distance >= repulsion_distance
+
+        return repulsion_vector
+
+    def compute_forces(self, pos_i, pos_j, rep_dis, safe_dis, add_rep):
+        # Calculate the norm
+        norm = np.linalg.norm(pos_j - pos_i)
+        # Initialize forces
+        v_sep = v_coh = v_rep = 0
+
+        if norm < self.r_max:
+            v_sep = self.compute_separation_force(pos_i, pos_j)
+            v_coh = self.compute_cohesion_force(pos_i, pos_j)
+            if add_rep:
+                v_rep = self.compute_repulsion_force(pos_i, pos_j, rep_dis, safe_dis, self.k_rep)
+                
+        return v_sep, v_coh, v_rep
+     
+    def compute_velocity(self, rep_dis, safe_dis, add_rep):
+        # Loop through i-th UAV
         for i in range(self.num_uavs):
             name_i = "UAV" + str(i + 1)
             pos_i = self.get_UAV_pos(vehicle_name=name_i)
-            r_mig = pos_mig - pos_i   # 计算从当前无人机的位置到蜂群中心的向量
-            
-            # 其实逻辑很简单，就是增加了蜂群移动的目标点，然后计算迁移速度，这是使无人机向蜂群中心移动的速度
-            v_mig = self.k_mig * r_mig / np.linalg.norm(r_mig) #  计算迁移速度，这是使无人机向蜂群中心移动的速度
-            v_sep = np.zeros([2, 1])
-            v_coh = np.zeros([2, 1])
-            v_rep = np.zeros([2, 1])
+             # vector from UAV to migration point
+            r_mig = self.pos_mig - pos_i
             N_i = 0
             
-            for j in range(self.num_uavs): # 计算排斥速度，这是使无人机避免与其他无人机碰撞的速度
+            if np.linalg.norm(r_mig) != 0:
+                v_mig = self.k_mig * r_mig / np.linalg.norm(r_mig)
+            else:
+                v_mig = np.zeros([2, 1])
+            
+            # Loop through j-th UAV
+            for j in range(self.num_uavs):
                 if j != i:
                     N_i += 1
                     name_j = "UAV" + str(j + 1)
                     pos_j = self.get_UAV_pos(vehicle_name=name_j)
-                    r_ij = pos_j - pos_i
-                    dist = np.linalg.norm(r_ij)
-                    if dist < self.r_max:  #  检查距离是否小于最大感知距离。
-                        if dist < self.r_repulsion: #  如果距离小于排斥半径，则计算排斥速度。
-                            v_rep += - self.k_rep * (self.r_repulsion - dist) * r_ij / dist
-                        elif dist < self.d_desired: # 如果距离小于期望距离，则计算排斥速度。
-                            v_sep += -self.k_sep * (self.d_desired - dist) * r_ij / dist
-                        else: # 如果距离大于期望距离，则计算聚集速度。
-                            v_coh += self.k_coh * (dist - self.d_desired) * r_ij / dist
-            v_sep = v_sep / N_i 
-            v_coh = v_coh / N_i  
-            v_cmd[:, i] = (v_sep + v_coh + v_rep + v_mig ).flatten() 
+                    
+                    if np.linalg.norm(pos_j - pos_i) < self.r_max:
+                        v_sep, v_coh, v_rep = self.compute_forces(pos_i, pos_j, rep_dis, safe_dis, add_rep)
+                        self.v_sep += v_sep
+                        self.v_coh += v_coh
+                        self.v_rep += v_rep
+                        
+            self.v_sep /= N_i
+            self.v_coh /= N_i
+            self.v_rep /= N_i
+            
+            # print("v_sep shape:", self.v_sep.shape)
+            # print("v_coh shape:", self.v_coh.shape)
+            # print("v_rep shape:", self.v_rep.shape)
+            # print("v_mig shape:", v_mig.shape)
+                        
+            self.v_cmd[:, i:i + 1] = self.v_sep + self.v_coh + self.v_rep + v_mig
+            
+            # # limit the velocity
+            # if self.v_cmd[0, i] > self.v_max:
+            #     self.v_cmd[0, i] = self.v_max
+    
+    def move_UAVs(self, z_cmd):
+        for i in range(self.num_uavs):
+            name_i = "UAV" + str(i + 1)
+            self.client.moveByVelocityZAsync(self.v_cmd[0, i], self.v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+
+    # define the generator function for the formation points
+    def point_generator(self, type, spacing):
+        group_center = np.array([[0], [0]]) #self.get_swarm_center()
         
-        return v_cmd, z_cmd
-    
-    
 
+        if type == 'circle':
+            formation_angle_offset = 2 * np.pi / self.num_uavs
+            for i in range(self.num_uavs):
+                formation_angle = formation_angle_offset * i
+                yield group_center + spacing * np.array([[np.cos(formation_angle)], [np.sin(formation_angle)]])
+                
+        elif type == 'line':
+            for i in range(self.num_uavs):
+                yield np.array([[i * spacing], [group_center[1, 0]]])
+                     
+        elif type == 'diagonal':
+            for i in range(self.num_uavs):
+                row = col = i  # For a diagonal, row index equals column index
+                yield np.array([[group_center[0, 0] + (col * spacing)], 
+                                [group_center[1, 0] + row * spacing]])
+                         
+        elif type == 'V':
+            for i in range(self.num_uavs):
+                yield group_center + np.array([[abs((i - self.num_uavs // 2)) * spacing], 
+                                            [(i - self.num_uavs // 2) * spacing]])
+        else:
+            raise ValueError(f'Unknown formation type: {type}')
 
+    #Define the calculate_velocity function
+    def calculate_formation_velocity(self, rep_dis, safe_dis, formation_point_gen):
+        v_sep, v_rep, v_coh, N_i = 0, 0, 0, 0
+        for i, formation_point in enumerate(formation_point_gen):
+            # Define the name and position of the current UAV
+            name_i = "UAV" + str(i + 1)
+            pos_i = self.get_UAV_pos(vehicle_name=name_i)
+
+            # Compute the desired velocity for the current UAV
+            v_mig = self.k_mig * (formation_point - pos_i)
+            N_i += 1
+
+            # Compute the repulsion vector if the other UAVs are within the repulsion distance
+            for j in range(self.num_uavs):
+                if j != i:
+                    # Define the name and position of the other UAV
+                    name_j = "UAV" + str(j + 1)
+                    pos_j = self.get_UAV_pos(vehicle_name=name_j)
+                    dist_ij = np.linalg.norm(pos_j - pos_i)
+                    
+                    if dist_ij < self.r_max:
+                        # Compute the repulsion force
+                        repulsion_force = self.compute_repulsion_force(pos_i, pos_j, rep_dis, safe_dis, self.k_rep)
+                        # Add repulsion force to the repulsion velocit
+                        v_rep += repulsion_force
+                        v_sep += self.compute_separation_force(pos_i, pos_j)
+                        v_coh += self.compute_cohesion_force(pos_i, pos_j)
+                           
+
+            v_rep /= N_i
+            v_sep /= N_i
+            v_coh /= N_i
+            # Calculate the final desired velocity
+            v_desired = v_mig + v_rep + v_sep + v_coh
+        
+            # Limit the velocity to the maximum allowed speed
+            v_desired_norm = np.linalg.norm(v_desired)
+            if v_desired_norm > self.v_max:
+                v_desired = self.v_max * v_desired / v_desired_norm
+
+            self.v_cmd[:, i:i + 1] = v_desired
     
+    # define form functions
+    def form_circle(self, rep_dis, safe_dis, spacing=15):
+        formation_points = self.point_generator('circle', spacing)
+        self.calculate_formation_velocity(rep_dis, safe_dis, formation_points)
+
+    def form_line(self, rep_dis, safe_dis, spacing=10):
+        formation_points = self.point_generator('line', spacing)
+        self.calculate_formation_velocity(rep_dis, safe_dis, formation_points)
+
+    def form_V(self, rep_dis, safe_dis, spacing=10):
+        formation_points = self.point_generator('V', spacing)
+        self.calculate_formation_velocity(rep_dis, safe_dis, formation_points)
+
+    def form_diagonal(self, rep_dis, safe_dis, spacing=10):
+        formation_points = self.point_generator('diagonal', spacing)
+        self.calculate_formation_velocity(rep_dis, safe_dis, formation_points)

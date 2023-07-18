@@ -6,7 +6,7 @@ class HandDetector:
     def __init__(
         self,
         use_static_image_mode=False,
-        max_num_hands=1,
+        max_num_hands=2,
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5
     ):
@@ -19,11 +19,13 @@ class HandDetector:
             min_tracking_confidence=min_tracking_confidence,
         )
         
+        self.mp_pose = mp.solutions.pose
+        
         # drawing utilities
         self.mp_drawing = mp.solutions.drawing_utils
-        self.landmark_drawing_spec = self.mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=3, circle_radius=2)
-        self.connection_drawing_spec = self.mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=3, circle_radius=2) 
-    
+        self.landmark_drawing_spec = self.mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=4, circle_radius=3)
+        self.connection_drawing_spec = self.mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=4, circle_radius=2) 
+            
     def detect(self, image):
         """
         Detect hands in the given image.
@@ -105,4 +107,3 @@ class HandDetector:
                     self.connection_drawing_spec    # connection drawing spec
                 )
     
-

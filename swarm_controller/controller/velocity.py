@@ -227,11 +227,11 @@ class VelocityComputation():
         formation_points = self.point_generator('circle', spacing)
         self.calculate_formation_velocity(rep_dis, safe_dis, formation_points)
 
-    def form_line(self, rep_dis, safe_dis, spacing=10):
+    def form_line(self, rep_dis, safe_dis, spacing=12):
         formation_points = self.point_generator('line', spacing)
         self.calculate_formation_velocity(rep_dis, safe_dis, formation_points)
 
-    def form_V(self, rep_dis, safe_dis, spacing=10):
+    def form_V(self, rep_dis, safe_dis, spacing=12):
         formation_points = self.point_generator('V', spacing)
         self.calculate_formation_velocity(rep_dis, safe_dis, formation_points)
 

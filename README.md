@@ -1,3 +1,3 @@
 # HGI_Platform
 
-![hands]()./Image/hands.gif)
+![hands](./Image/hands.gif)

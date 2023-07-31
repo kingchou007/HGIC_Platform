@@ -39,11 +39,11 @@ def main():
             break
 
         # Hand detection
-        blank_image = np.zeros(frame.shape, dtype=np.uint8)
+        #blank_image = np.zeros(frame.shape, dtype=np.uint8)
         #blank_image = np.full(frame.shape, (128, 128, 128), dtype=np.uint8)
         landmarks, bboxes, results, dy_landmark_list = hand_detector.detect(frame)
-        hand_detector.draw_bounding_rect(blank_image, bboxes)
-        hand_detector.draw_landmarks(blank_image, results)  # Draw landmarks
+        hand_detector.draw_bounding_rect(frame, bboxes)
+        hand_detector.draw_landmarks(frame, results)  # Draw landmarks
 
         cmd, score, current = None, None, None
         
@@ -81,13 +81,13 @@ def main():
             current = prev_mode
             
         # Draw on the frame #TODO
-        draw.real_time_score(blank_image, bboxes, cmd, score) 
-        draw.show_fps(blank_image, fps)
-        draw.gesture_UI(blank_image, current, cmd)
+        draw.real_time_score(frame, bboxes, cmd, score) 
+        draw.show_fps(frame, fps)
+        draw.gesture_UI(frame, current, cmd)
         # draw.swarm_UI(frame, hand_sign_id, hand_sign_id, hand_sign_id) #TODO: add swarm UI
         
         # Display results or perform actions based on the classification
-        cv.imshow("Hand Gesture Based Interactive UAVs Control (HGI) Platform", blank_image)
+        cv.imshow("Hand Gesture Based Interactive UAVs Control (HGI) Platform", frame)
         key = cv.waitKey(1)
         if key == 27:  # ESC key
             break

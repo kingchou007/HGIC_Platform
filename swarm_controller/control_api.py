@@ -572,7 +572,6 @@ def circle_move():
             formation_radius = 5  # Distance between the UAVs in the formation
             formation_angle_offset = 2 * np.pi / 9  # Angular offset between UAVs in the formation
             formation_angle = formation_angle_offset * i  # calculates the specific angle for the current UAV based on its index
-            # 通过将编队中心与编队半径和使用cos和sin计算的x和y坐标的乘积相加，计算出当前无人机的编队点
             formation_point = group_center + formation_radius * np.array(
                 [[np.cos(formation_angle)], [np.sin(formation_angle)]])
 
@@ -1220,87 +1219,87 @@ def target_and_chasing():
     for i in toat_uavs:
         client.moveByVelocityZAsync(0, 0, height, time_step, vehicle_name=i)
 
-def target_and_chasing_all_one():
-    # Parameters
-    radius = 40  # radius of circle
-    height = -40  # altitude
-    speed = 20  # speed of UAV
-    time_step = 0.1  # Time interval in seconds
+# def target_and_chasing_all_one():
+#     # Parameters
+#     radius = 40  # radius of circle
+#     height = -40  # altitude
+#     speed = 20  # speed of UAV
+#     time_step = 0.1  # Time interval in seconds
 
-    ############## chasing #################
-    s_max = 25
+#     ############## chasing #################
+#     s_max = 25
 
-    # Assign UAVs to chase UAV 1
+#     # Assign UAVs to chase UAV 1
 
-    chase_uavs = ["UAV2", "UAV3", "UAV4", "UAV5", "UAV6", "UAV7", "UAV8", "UAV9"]  # make as a dynamic list
-    # chase_uavs = ["UAV2", "UAV3", "UAV4"]
-    target_uav = "UAV1"
-    total_uavs = ["UAV1", "UAV2", "UAV3", "UAV4", "UAV5", "UAV6", "UAV7", "UAV8", "UAV9"]
+#     chase_uavs = ["UAV2", "UAV3", "UAV4", "UAV5", "UAV6", "UAV7", "UAV8", "UAV9"]  # make as a dynamic list
+#     # chase_uavs = ["UAV2", "UAV3", "UAV4"]
+#     target_uav = "UAV1"
+#     total_uavs = ["UAV1", "UAV2", "UAV3", "UAV4", "UAV5", "UAV6", "UAV7", "UAV8", "UAV9"]
 
-    # need optimization
-    # Get initial position of UAV1
-    current_pos = get_UAV_pos(client, vehicle_name="UAV1")
+#     # need optimization
+#     # Get initial position of UAV1
+#     current_pos = get_UAV_pos(client, vehicle_name="UAV1")
 
-    # Calculate the time it takes for one complete circle
-    circle_time = 2 * math.pi * radius / speed
+#     # Calculate the time it takes for one complete circle
+#     circle_time = 2 * math.pi * radius / speed
 
-    # Calculate the angle increment for each time step
-    angle_increment = 2 * math.pi / (circle_time / time_step)
+#     # Calculate the angle increment for each time step
+#     angle_increment = 2 * math.pi / (circle_time / time_step)
 
-    # Set initial angle
-    angle = 0
+#     # Set initial angle
+#     angle = 0
 
-    # Main loop to control UAVs to chase target UAV
-    for t in range(300):
-        # Calculate the position of UAV1 on the circle
-        x = current_pos[0] + radius * np.cos(angle)
-        y = current_pos[1] + radius * np.sin(angle)
+#     # Main loop to control UAVs to chase target UAV
+#     for t in range(300):
+#         # Calculate the position of UAV1 on the circle
+#         x = current_pos[0] + radius * np.cos(angle)
+#         y = current_pos[1] + radius * np.sin(angle)
 
-        # Calculate the distance and direction to the target position
-        dx = x - current_pos[0]
-        dy = y - current_pos[1]
-        distance = np.sqrt(dx ** 2 + dy ** 2)
+#         # Calculate the distance and direction to the target position
+#         dx = x - current_pos[0]
+#         dy = y - current_pos[1]
+#         distance = np.sqrt(dx ** 2 + dy ** 2)
 
-        # Calculate the velocity components based on the distance and speed
-        v_x = -speed * (dx / distance)
-        v_y = -speed * (dy / distance)
+#         # Calculate the velocity components based on the distance and speed
+#         v_x = -speed * (dx / distance)
+#         v_y = -speed * (dy / distance)
 
-        # Send the command to UAV1
-        if t <= 280:
-            client.moveByVelocityZAsync(float(v_x), float(v_y), height, time_step, vehicle_name=target_uav)
+#         # Send the command to UAV1
+#         if t <= 280:
+#             client.moveByVelocityZAsync(float(v_x), float(v_y), height, time_step, vehicle_name=target_uav)
 
-        # Get current position of UAV1
-        if t / 2 == 0:
-            time.sleep(time_step)
+#         # Get current position of UAV1
+#         if t / 2 == 0:
+#             time.sleep(time_step)
 
-        current_pos = get_UAV_pos(client, vehicle_name=target_uav)
-        # Get current position of target UAV (UAV1)
-        # time.sleep(time_step)
-        target_pos = current_pos
+#         current_pos = get_UAV_pos(client, vehicle_name=target_uav)
+#         # Get current position of target UAV (UAV1)
+#         # time.sleep(time_step)
+#         target_pos = current_pos
 
-        # Loop through the chasing UAVs
-        for name_i in chase_uavs:
-            # Get current position of chasing UAV
-            current_pos_chase = get_UAV_pos(client, vehicle_name=name_i)
-            # Calculate the direction vector towards the target UAV (UAV1)
-            direction = target_pos - current_pos_chase
-            distance = np.linalg.norm(direction)  # distance formula
+#         # Loop through the chasing UAVs
+#         for name_i in chase_uavs:
+#             # Get current position of chasing UAV
+#             current_pos_chase = get_UAV_pos(client, vehicle_name=name_i)
+#             # Calculate the direction vector towards the target UAV (UAV1)
+#             direction = target_pos - current_pos_chase
+#             distance = np.linalg.norm(direction)  # distance formula
 
-            # Normalize the direction vector
-            if distance != 0:
-                direction /= distance
-            s_c = np.minimum(s_max, distance)
+#             # Normalize the direction vector
+#             if distance != 0:
+#                 direction /= distance
+#             s_c = np.minimum(s_max, distance)
 
-            # Calculate the velocity vector
-            repulsion_vectors = uav_collision()
-            v_c = s_c * direction + repulsion_vectors[total_uavs.index(name_i)]
+#             # Calculate the velocity vector
+#             repulsion_vectors = uav_collision()
+#             v_c = s_c * direction + repulsion_vectors[total_uavs.index(name_i)]
 
-            # Send the command to the chasing UAVs
-            client.moveByVelocityZAsync(float(v_c[0]), float(v_c[1]), height, time_step, vehicle_name=name_i)
+#             # Send the command to the chasing UAVs
+#             client.moveByVelocityZAsync(float(v_c[0]), float(v_c[1]), height, time_step, vehicle_name=name_i)
 
-        # Update the angle
-        angle += angle_increment
-    stop_all()
+#         # Update the angle
+#         angle += angle_increment
+#     stop_all()
 
 def stop_all():
     time_step = 0.1

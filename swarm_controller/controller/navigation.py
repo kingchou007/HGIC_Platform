@@ -7,8 +7,7 @@ class NavigationController(object):
         self.controller = velocityComputation()
         
         # Set default parameters
-        self.controller.set_parameters(v_max=10, r_max=5, k_sep=2, k_coh=0.2, k_mig=5, 
-                                       r_repulsion=0, d_desired=0)
+        self.controller.set_parameters(v_max=10, r_max=5, k_sep=2, k_coh=0.2, k_mig=5)
 
     # Navigation methods   
     def forward(self, desired_distance = 10):

@@ -1,6 +1,6 @@
 import airsim
 import numpy as np
-from configuration import Configuration
+from .configuration import Configuration
 from scipy.spatial import Voronoi
 
 class VelocityComputation():
@@ -9,7 +9,6 @@ class VelocityComputation():
         self.client = airsim.MultirotorClient()
         self.client.confirmConnection()
         self.config = Configuration()
-        
         # Define the origin position of the swarm
         self.origin = self.config.origin
         self.origin_x = self.config.origin_x
@@ -25,7 +24,6 @@ class VelocityComputation():
         self.r_repulsion = r_repulsion
         self.d_desired = d_desired
         self.k_rep = k_rep
-        self.adjust = 0
         
         self.v_cmd = np.zeros([2, self.num_uavs])
         self.v_rep = np.zeros([2, 1])
@@ -34,6 +32,10 @@ class VelocityComputation():
         self.z_cmd = self.get_avg_altitude()
         self.pos_mig = np.array([[0], [0]])
         
+    def velocity_control(self):
+        temp = 0
+        
+    
     def get_UAV_pos(self, vehicle_name="SimpleFlight"):
         state = self.client.simGetGroundTruthKinematics(vehicle_name=vehicle_name)
         x = state.position.x_val
@@ -520,3 +522,24 @@ class VelocityComputation():
                 name_i = "UAV" + str(i + 1)
                 self.client.moveByVelocityZAsync(self.v_cmd[0, i], self.v_cmd[1, i], self.z_cmd, 0.1, vehicle_name=name_i)
                 
+                
+    def get_collision_info(self):
+        for i in range(self.num_uavs):
+            name = f"UAV{i+1}"
+            collision_info = self.client.simGetCollisionInfo(vehicle_name=name)
+            if collision_info.has_collided:
+                print(f"UAV{i+1} collided with {collision_info.object_name}")
+                return True
+        # print("No collisions detected")
+        # return False
+                
+       
+    # def get_UAV_pos(self, vehicle_name="UAV1"):
+    
+# def main():
+#     swarm = VelocityComputation()
+#     while True:
+#         swarm.get_collision_info()
+
+# if __name__ == "__main__":
+#     main()    

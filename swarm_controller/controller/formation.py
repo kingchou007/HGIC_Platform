@@ -1,5 +1,5 @@
-from velocity import VelocityComputation
-from configuration import Configuration
+from .velocity import VelocityComputation
+from .configuration import Configuration
 
 class FormationController(object):
     def __init__(self):
@@ -64,19 +64,19 @@ class FormationController(object):
         info = self.control.compute_density()
         print("Density: ", info)
 
-def main():
-    swarm = FormationController()
+# def main():
+#     swarm = FormationController()
     
-    # swarm.spread()
+#     # swarm.spread()
     
     
-    # swarm.line()
-    # swarm.V_formation()
+#     # swarm.line()
+#     # swarm.V_formation()
     
-    # swarm.circle()
-    # swarm.diagonal()
-    # swarm.merge()
-    swarm.change_velocity()
+#     # swarm.circle()
+#     # swarm.diagonal()
+#     # swarm.merge()
+#     # swarm.change_velocity()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

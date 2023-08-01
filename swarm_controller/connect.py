@@ -4,39 +4,46 @@ import threading
 import time
 import numpy as np
 import keyboard
+import sys
+sys.path.append("/path/to/controller")
 
 # Import the functions from the controller package 
 from controller.configuration import Configuration as config
 from controller.task import TaskControl as task
-from controller.navigation import NavigationController as nav
+# from controller.navigation import NavigationController as nav
 from controller.formation import FormationController as formation
+from controller.velocity import VelocityComputation
 
 
 # Define valid commands and map them to corresponding functions
 COMMANDS = {
-    "take off": nav.take_off,
-    "land": nav.land,
-    "spread": formation.spread,
-    "merge": formation.merge,
-    "up": nav.up,
-    "down": nav.down,
-    "forward": nav.forward,
-    "backward": nav.backward,
-    "left": nav.left,
-    "right": nav.right,
-    "chase": task.chasing,
-    "cover": task.cover,
+    # "take off": nav.take_off,
+    # "land": nav.land,
+    # "spread": formation.spread,
+    # "merge": formation.merge,
+    # "up": nav.up,
+    # "down": nav.down,
+    # "forward": nav.forward,
+    # "backward": nav.backward,
+    # "left": nav.left,
+    # "right": nav.right,
+    # "chase": task.chasing,
+    # "cover": task.cover,
     "circle search": task.circle_search,
     "v)search": task.circle_v_search,
     "search": task.line_search,
-    "circle": formation.circle,
-    "v": formation.circle_v,
+    # "circle": formation.circle,
+    # "v": formation.circle_v,
     "line": formation.line,
-    
+
 }
 
 # Function to calculate time-weighted command frequencies
 def time_weighted_freqs(command_queue):
+    """
+    - function calculates the frequency of each command in the queue\
+    - with more recent commands receiving a higher weight.
+    """
     now = time.time()
     command_freqs = collections.defaultdict(int)
     for command, timestamp in command_queue:
@@ -57,23 +64,32 @@ def receive_message(sock, command_queue):
         # Send a response to the client
         response = "Command received: " + command
         #sock.sendto(response.encode(), addr)
-
-
+        
 def main():
-    UDP_IP = "127.0.0.1"
-    UDP_PORT = 5000
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((UDP_IP, UDP_PORT))
+    ######################### get collision information ###########################
+    swarm = VelocityComputation()
+    collision_count = 0
+    
+    ############################# Communication setup #############################
+    UDP_IP = "127.0.0.1"                                                    
+    UDP_PORT = 5000                                                            
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)                    
+    sock.bind((UDP_IP, UDP_PORT))                                           
 
+    ############################## process command ################################
     command_queue = []
     COMMAND_THRESHOLD = 20  # Perform command after every 25 received commands
-
     # Start receiving messages asynchronously
     threading.Thread(target=receive_message, args=(sock, command_queue)).start()
-
     last_command = ""
     
+    # Main Loop
     while True:
+        status = swarm.get_collision_info()
+        if status == True:
+            collision_count += 1 # send this back to Inteaction system
+            print(collision_count)
+        
         if len(command_queue) >= COMMAND_THRESHOLD:
             command_freqs = time_weighted_freqs(command_queue)
             most_common_command = max(command_freqs, key=command_freqs.get)
@@ -86,7 +102,6 @@ def main():
                 
         if keyboard.is_pressed('q'):
             break
-
 
 if __name__ == "__main__":
     main()

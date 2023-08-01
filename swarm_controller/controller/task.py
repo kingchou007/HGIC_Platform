@@ -1,5 +1,4 @@
-from velocity import VelocityComputation
-import numpy as np
+from .velocity import VelocityComputation
 
 class TaskControl(object):
     def __init__(self):
@@ -17,24 +16,24 @@ class TaskControl(object):
         self.control.set_parameters(v_max=10, r_max=20, k_mig=0.5, k_rep=15, k_sep=0.5, k_coh=1)
         self.control.line_search()
         
-    
     def cover(self):
         self.control.set_parameters(v_max=10, r_max=30, k_mig=3, k_rep=25, k_sep=2, k_coh=0)
         self.control.space_ccupation()
         
     def chase(self):
         pass
-def main():
-    task = TaskControl()
     
-    # task.chase()
-    #task.circle_search()
-    #task.circle_v_search()
-    task.cover()
-    # task.line_search()
+# def main():
+#     task = TaskControl()
     
-if __name__ == '__main__':
-    main()
+#     # task.chase()
+#     #task.circle_search()
+#     #task.circle_v_search()
+#     task.cover()
+#     # task.line_search()
+    
+# if __name__ == '__main__':
+#     main()
         
         
         

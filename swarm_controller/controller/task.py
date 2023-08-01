@@ -21,9 +21,13 @@ class TaskControl(object):
     def cover(self):
         self.control.set_parameters(v_max=10, r_max=30, k_mig=3, k_rep=25, k_sep=2, k_coh=0)
         self.control.space_ccupation()
-
+        
+    def chase(self):
+        pass
 def main():
     task = TaskControl()
+    
+    # task.chase()
     #task.circle_search()
     #task.circle_v_search()
     task.cover()

@@ -1,27 +1,38 @@
 import socket
-import control_api as SwarmControl
 import collections
 import threading
 import time
 import numpy as np
 import keyboard
 
+# Import the functions from the controller package 
+from controller.configuration import Configuration as config
+from controller.task import TaskControl as task
+from controller.navigation import NavigationController as nav
+from controller.formation import FormationController as formation
+
+
 # Define valid commands and map them to corresponding functions
 COMMANDS = {
-    "take off": SwarmControl.take_off,
-    "land": SwarmControl.land,
-    "spread": SwarmControl.spread,
-    "merge": SwarmControl.merge,
-    "up": SwarmControl.up,
-    "down": SwarmControl.down,
-    "forward": SwarmControl.forward,
-    "backward": SwarmControl.backward,
-    "left": SwarmControl.left,
-    "right": SwarmControl.right,
-    "chase": SwarmControl.chasing,
-    "cover": SwarmControl.cover_block,
-    "search": SwarmControl.spiral_motion,
-    "NOP": SwarmControl.nop
+    "take off": nav.take_off,
+    "land": nav.land,
+    "spread": formation.spread,
+    "merge": formation.merge,
+    "up": nav.up,
+    "down": nav.down,
+    "forward": nav.forward,
+    "backward": nav.backward,
+    "left": nav.left,
+    "right": nav.right,
+    "chase": task.chasing,
+    "cover": task.cover,
+    "circle search": task.circle_search,
+    "v)search": task.circle_v_search,
+    "search": task.line_search,
+    "circle": formation.circle,
+    "v": formation.circle_v,
+    "line": formation.line,
+    
 }
 
 # Function to calculate time-weighted command frequencies

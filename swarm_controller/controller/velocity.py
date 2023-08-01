@@ -1,29 +1,22 @@
 import airsim
 import numpy as np
-from scipy.spatial import Voronoi, voronoi_plot_2d
-
+from configuration import Configuration
+from scipy.spatial import Voronoi
 
 class VelocityComputation():
     def __init__(self):
         # Build a connection with AirSim
         self.client = airsim.MultirotorClient()
         self.client.confirmConnection()
+        self.config = Configuration()
         
-        # self.config = Configuration()
-
         # Define the origin position of the swarm
-        self.origin = [[0, 0], [2, 0], [4, 0], 
-                       [0, -3], [2, -2], [4, -3], 
-                       [0, 3], [2, 2], [4, 3]]
-        
-        self.origin_x = [0, 2, 4, 0, 2, 4, 0, 2, 4]
-        self.origin_y = [0, 0, 0, -3, -2, -3, 3, 2, 3]
-        self.origin_z = [] # most action will be in 2D plane
-        
-        self.num_uavs = len(self.origin) # can be selected from 1 to 9
-          
-    def set_parameters(self, v_max=0, r_max=20, k_sep=0, k_coh=0, 
-                       k_mig=1, k_rep=0, r_repulsion=0, d_desired=0):
+        self.origin = self.config.origin
+        self.origin_x = self.config.origin_x
+        self.origin_y = self.config.origin_y
+        self.num_uavs = self.config.num_uavs
+      
+    def set_parameters(self, v_max=0, r_max=20, k_sep=0, k_coh=0, k_mig=1, k_rep=0, r_repulsion=0, d_desired=0):
         self.v_max = v_max
         self.r_max = r_max
         self.k_sep = k_sep
@@ -32,6 +25,7 @@ class VelocityComputation():
         self.r_repulsion = r_repulsion
         self.d_desired = d_desired
         self.k_rep = k_rep
+        self.adjust = 0
         
         self.v_cmd = np.zeros([2, self.num_uavs])
         self.v_rep = np.zeros([2, 1])

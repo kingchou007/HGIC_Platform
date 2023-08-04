@@ -1,4 +1,4 @@
-class Configuration:
+class Configuration(object):
     def __init__(self):
         # Define the origin position of the swarm
         self.origin = [[0, 0], [2, 0], [4, 0], 
@@ -43,8 +43,3 @@ class Configuration:
     def select_all(self):
         self.num_uavs = len(self.origin)
         return self.num_uavs
-
-# config = Configuration()   
-# config. add()
-# config. add()
-

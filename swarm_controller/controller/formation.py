@@ -1,15 +1,15 @@
-from .velocity import VelocityComputation
-from .configuration import Configuration
+from velocity import VelocityComputation
+# from configuration import Configuration
 
 class FormationController(object):
     def __init__(self):
         self.control = VelocityComputation()
-        self.config = Configuration()
+        # self.config = Configuration()
         self.pos_mig = self.control.get_swarm_center() 
         self.z_cmd = self.control.get_avg_altitude()
         self.compute_velocity = self.control.compute_velocity
         self.move_UAVs = self.control.move_UAVs
-        self.adjust_v_max = self.control.v_max
+        # self.adjust_v_max = self.control.v_max
         
     def change_velocity(self):
         self.adjust_v_max += self.config.increase_max_velocity()
@@ -18,7 +18,7 @@ class FormationController(object):
     def merge(self):
         self.control.set_parameters(v_max=3, r_max=20, k_sep=1.7, k_coh=0.5, k_mig=1, k_rep=9, r_repulsion=8)
         self.control.pos_mig = self.control.get_swarm_center()
-        self.run_loop(True, 9, 5, 800)
+        self.run_loop(True, 5, 5, 800)
         
     def spread(self):
         self.control.set_parameters(v_max=15, r_max=20, k_sep=35, k_coh=1.3, k_mig=1)
@@ -64,19 +64,17 @@ class FormationController(object):
         info = self.control.compute_density()
         print("Density: ", info)
 
-# def main():
-#     swarm = FormationController()
+def main():
+    swarm = FormationController()
     
-#     # swarm.spread()
+    # swarm.spread()
+    # swarm.line()
+    # swarm.V_formation()
     
-    
-#     # swarm.line()
-#     # swarm.V_formation()
-    
-#     # swarm.circle()
-#     # swarm.diagonal()
-#     # swarm.merge()
-#     # swarm.change_velocity()
+    swarm.circle()
+    # swarm.diagonal()
+    # swarm.merge()
+    # swarm.change_velocity()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

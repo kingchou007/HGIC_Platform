@@ -1,6 +1,6 @@
 import airsim
 import numpy as np
-from .configuration import Configuration
+from configuration import Configuration
 from scipy.spatial import Voronoi
 
 class VelocityComputation():

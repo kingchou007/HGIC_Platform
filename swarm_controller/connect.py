@@ -30,7 +30,7 @@ COMMANDS = {
     # "chase": task.chasing,
     # "cover": task.cover,
     "circle search": task.circle_search,
-    "v)search": task.circle_v_search,
+    "v_search": task.circle_v_search,
     "search": task.line_search,
     # "circle": formation.circle,
     # "v": formation.circle_v,
@@ -53,7 +53,7 @@ def time_weighted_freqs(command_queue):
     return command_freqs
 
 # Build a UDP socket to receive commands from the user side  
-def receive_message(sock, command_queue):
+def receive_sendback_message(sock, command_queue):
     while True:
         command, addr = sock.recvfrom(1024)
         command = command.decode('utf8')  # Convert bytes to string
@@ -66,22 +66,25 @@ def receive_message(sock, command_queue):
         #sock.sendto(response.encode(), addr)
         
 def main():
-    ######################### get collision information ###########################
+    #get collision information
     swarm = VelocityComputation()
     collision_count = 0
     
-    ############################# Communication setup #############################
+    #Communication setup
     UDP_IP = "127.0.0.1"                                                    
     UDP_PORT = 5000                                                            
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)                    
     sock.bind((UDP_IP, UDP_PORT))                                           
 
-    ############################## process command ################################
+    #process command logic
     command_queue = []
     COMMAND_THRESHOLD = 20  # Perform command after every 25 received commands
     # Start receiving messages asynchronously
-    threading.Thread(target=receive_message, args=(sock, command_queue)).start()
+    threading.Thread(target=receive_sendback_message, args=(sock, command_queue)).start()
     last_command = ""
+    
+    # show velocity_max
+    v_max = 0
     
     # Main Loop
     while True:

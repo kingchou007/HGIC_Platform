@@ -7,13 +7,13 @@
         "6": "left",
         "7": "right"
     },
-    "Formation Control": {
+    "Formation": {
         "0": "spread",
         "1": "merge",
         "2": "",
         "16": ""
     },
-    "Task Control": {
+    "Task": {
         "11": "search",
         "10": "cover",
         "9": "chase"

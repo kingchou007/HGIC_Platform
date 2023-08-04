@@ -14,6 +14,20 @@ def send_Message(message, UDP_IP, UDP_PORT):
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.sendto(message.encode('utf8'), (UDP_IP, UDP_PORT))
     udp_socket.close()
+    
+
+# display the infromation
+def add_sidebar(image, sidebar_width, sidebar_color):
+    # Create a blank image with the sidebar color
+    sidebar = np.full((image.shape[0], sidebar_width, 3), sidebar_color, dtype=np.uint8)
+    # Draw text on the sidebar
+    # Concatenate the sidebar and the original image
+    image_with_sidebar = np.concatenate((sidebar, image), axis=1)
+
+    return image_with_sidebar
+            
+    
+
 
 def main():
     # Create instances
@@ -30,10 +44,12 @@ def main():
     finger_gesture_history = deque(maxlen=16)
 
     prev_mode = None  # Initialize previous mode variable
+    
 
     while True:
         fps = cvFpsCalc.get()  # FPS calculation
         ret, frame = cap.read()  # Read frame
+        frame = add_sidebar(frame, 300, (224, 230, 241))
 
         if not ret:
             break
@@ -56,7 +72,7 @@ def main():
             cmd = command
 
             # Dynamic gesture recognition
-            if current_mode == "Formation Control":
+            if current_mode == "Formation":
                 if hand_sign_id in [16, 2]:
                     point_history.append(dy_landmark_list[8])
                 else:
@@ -84,6 +100,10 @@ def main():
         draw.real_time_score(frame, bboxes, cmd, score) 
         draw.show_fps(frame, fps)
         draw.gesture_UI(frame, current, cmd)
+        draw.human_UI(frame)
+        draw.robot_UI(frame)
+        draw.swarm_info(frame)
+        
         # draw.swarm_UI(frame, hand_sign_id, hand_sign_id, hand_sign_id) #TODO: add swarm UI
         
         # Display results or perform actions based on the classification

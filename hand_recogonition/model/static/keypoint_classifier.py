@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import tensorflow as tf
+from timingdecorator.timeit import timeit
 
 
 class KeyPointClassifier(object):
     def __init__(
         self,
         model_path='model/static/keypoint_classifier.tflite',
+        #model_path='model/static/temp/keypoint_classifier.tflite',
         num_threads=1,
     ):
         self.interpreter = tf.lite.Interpreter(model_path=model_path,
@@ -16,6 +18,7 @@ class KeyPointClassifier(object):
         self.interpreter.allocate_tensors()
         self.input_details = self.interpreter.get_input_details()
         self.output_details = self.interpreter.get_output_details()
+
 
     def __call__(
         self,

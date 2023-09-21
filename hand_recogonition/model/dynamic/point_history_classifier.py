@@ -8,6 +8,7 @@ class PointHistoryClassifier(object):
     def __init__(
         self,
         model_path='model/dynamic/point_history_classifier.tflite',
+        # model_path='model/dynamic/RNN_history_classifier.tflite',
         score_th=0.5,
         invalid_value=0,
         num_threads=1,

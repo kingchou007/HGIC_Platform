@@ -1,7 +1,8 @@
 import json
 import os
 from collections import deque, Counter
-
+from timingdecorator.timeit import timeit
+import time
 
 class GestureCommandProcessor:
     def __init__(self):
@@ -20,6 +21,7 @@ class GestureCommandProcessor:
         self.switch_buffer = deque(maxlen=25)
         self.frames_since_last_switch = 0  # Counter for frames since last mode switch
 
+    #@timeit
     def switch_mode(self, hand_sign_id):
         switch_mode_sign_id = 3  # the sign_id for switching modes
         # Add the current hand sign to the buffer
@@ -43,12 +45,15 @@ class GestureCommandProcessor:
         self.frames_since_last_switch += 1
 
     # Execute the corresponding command based on the hand_sign_id and current mode.
+    #@timeit
     def execute_command(self, hand_sign_id):
         # Check for emergency commands first since they have the highest priority
+        start_time = time.perf_counter()
         emergency_command = self.command_dict.get("Emergency", {}).get(str(hand_sign_id))
         if emergency_command is not None:
             print(f"Executing emergency command: '{emergency_command}'")
             return emergency_command
+      
 
         # Check for universal commands
         universal_command = self.command_dict.get("Universal", {}).get(str(hand_sign_id))
@@ -58,6 +63,9 @@ class GestureCommandProcessor:
 
         current_mode_command = self.command_dict.get(self.current_mode, {}).get(str(hand_sign_id), "None")
         return current_mode_command
+    
+        elapsed_time = (time.perf_counter() - start_time) * 1000
+        print(f"Inference time: {elapsed_time:.5f} ms")  # print
 
     def get_current_mode(self):
         return self.current_mode

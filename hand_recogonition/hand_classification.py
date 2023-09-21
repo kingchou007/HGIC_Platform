@@ -1,6 +1,8 @@
 import csv
 import copy
 from model import KeyPointClassifier, PointHistoryClassifier
+from timingdecorator.timeit import timeit
+
 
 class HandClassifier:
     def __init__(self, static_label_path='./model/static/keypoint_classifier_label.csv',
@@ -10,6 +12,7 @@ class HandClassifier:
         self.keypoint_classifier_labels = self.load_labels(static_label_path)
         self.point_history_classifier_labels = self.load_labels(dynamic_label_path)
 
+    
     def classify(self, landmarks, image):
         """
         Classify a static hand gesture based on landmarks.

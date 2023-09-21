@@ -1,6 +1,7 @@
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
+from timingdecorator.timeit import timeit
 
 class HandDetector:
     def __init__(
@@ -26,6 +27,7 @@ class HandDetector:
         self.landmark_drawing_spec = self.mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=4, circle_radius=3)
         self.connection_drawing_spec = self.mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=4, circle_radius=2) 
             
+    #@timeit
     def detect(self, image):
         """
         Detect hands in the given image.

@@ -7,6 +7,8 @@ from draw import Draw
 from process_cmd import GestureCommandProcessor
 from collections import deque, Counter
 import numpy as np
+import time
+from timingdecorator.timeit import timeit
 
 
 # Connection settings
@@ -53,7 +55,6 @@ def main():
 
         if not ret:
             break
-
         # Hand detection
         #blank_image = np.zeros(frame.shape, dtype=np.uint8)
         #blank_image = np.full(frame.shape, (128, 128, 128), dtype=np.uint8)
@@ -65,11 +66,18 @@ def main():
         
         # Hand classification
         if landmarks:
+            start_time = time.perf_counter()
             hand_sign_id, confidence_score = hand_classifier.classify(landmarks, frame)
+            elapsed_time = (time.perf_counter() - start_time) * 1000
+            #print(f"Inference time: {elapsed_time:.2f}")  # print
+            
+            start_time_2 = time.perf_counter()
             mode = cmd_process.switch_mode(hand_sign_id)
             current_mode = cmd_process.get_current_mode()
             command = cmd_process.execute_command(hand_sign_id)
             cmd = command
+            elapsed_time_2 = (time.perf_counter() - start_time_2) * 1000
+            # print(f"Inference time: {elapsed_time_2:.2f} ms")  # print
 
             # Dynamic gesture recognition
             if current_mode == "Formation":
@@ -88,10 +96,20 @@ def main():
                 else:
                     cmd = command
 
+
             score, current, prev_mode = confidence_score, current_mode, current_mode
             
+            # end_time = time.time()
+            # inference_time = time.perf_counter() - start_time
+            # save 2 decimal places
+            # inference_time = round(inference_time, 2)
+            # print("Inference time: ", inference_time, "ms")
+                
             # Send message to the control platform
+           
             send_Message(cmd, UDP_IP="127.0.0.1", UDP_PORT=5000)
+            #end_mes_time = (time.perf_counter() - msg_time) * 1000
+            #print(end_mes_time)
         else:
             point_history.append([0, 0])
             current = prev_mode

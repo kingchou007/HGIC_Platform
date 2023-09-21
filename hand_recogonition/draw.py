@@ -58,7 +58,7 @@ class Draw():
         y_2 = 370  # Distance from the top for command text
         y_3 = 400
         
-        temp = "None"
+        temp = "9"
         # Display the mode text
         cv.putText(image, f"Swarm Size: {temp}", (x, y_1), 
                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv.LINE_AA)

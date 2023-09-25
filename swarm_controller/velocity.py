@@ -534,8 +534,6 @@ class VelocityComputation:
             angle = (
                 2 * np.pi * t / 600
             )  # Angle based on the current time step（we hope have a circle movement）
-
-            # angle = 2 * np.pi * t / 600  # Angle based on the current time step（we hope have a circle movement）
             group_center_radius = (
                 60  # Set the radius of the circle for the group center
             )
@@ -646,7 +644,6 @@ class VelocityComputation:
                 [[np.cos(angle)], [np.sin(angle)]]
             )
 
-            # Generate the formation points for the V-shape
             formation_points = []
             for i in range(self.num_uavs):
                 point = np.array(
@@ -655,7 +652,6 @@ class VelocityComputation:
                         [(i - self.num_uavs // 2) * spacing],
                     ]
                 )
-                # Compute the rotation matrix based on the current angle
                 formation_angle = angle - np.pi / 2
                 rotation_matrix = np.array(
                     [
@@ -663,7 +659,6 @@ class VelocityComputation:
                         [np.sin(formation_angle), np.cos(formation_angle)],
                     ]
                 )
-                # # Rotate the point and add the group center
                 rotated_point = np.dot(rotation_matrix, point) + group_center
                 formation_points.append(rotated_point)
 
@@ -743,7 +738,6 @@ class VelocityComputation:
             x_min = x + 70
 
             n_drones = self.num_uavs
-            # Randomly generating drone positions within the specified area
             np.random.seed(0)  # for consistency
             drone_positions = np.random.rand(n_drones, 2) * [
                 x_max - x_min,
@@ -756,27 +750,17 @@ class VelocityComputation:
                 pos_i = self.get_UAV_pos(vehicle_name=name_i)  # (2, 1)
                 trajectories[i][t] = [pos_i[0][0], pos_i[1][0]]
                 pos_i = np.squeeze(pos_i)
-
-                # # vector from UAV to migration point
                 r_mig = drone_positions[i] - pos_i
                 r_mig = np.expand_dims(r_mig, axis=1)
-                # # Calculate the desired velocity for each UAV to reach its formation point
-
-                # save the position of the UAV
-
                 v_mig = self.k_mig * r_mig / np.linalg.norm(r_mig)
                 N_i = 0
-
-                # Get the region corresponding to the current drone
                 region = vor.point_region[i]
+                
                 if not -1 in vor.regions[region]:
                     polygon = [vor.vertices[j] for j in vor.regions[region]]
-                    # Compute centroid of the Voronoi cell
                     centroid = np.mean(polygon, axis=0)
-
                     name_i = "UAV" + str(i + 1)
                     pos_i = self.get_UAV_pos(vehicle_name=name_i)  # (2, 1)
-
                     pos_i = np.squeeze(pos_i)
                     r_mig = centroid - pos_i
                     r_mig = np.expand_dims(r_mig, axis=1)

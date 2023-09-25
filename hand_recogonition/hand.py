@@ -14,13 +14,15 @@ from timingdecorator.timeit import timeit
 @timeit
 def send_Message(message, UDP_IP, UDP_PORT):
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_socket.sendto(message.encode('utf8'), (UDP_IP, UDP_PORT))
+    udp_socket.sendto(message.encode("utf8"), (UDP_IP, UDP_PORT))
     udp_socket.close()
+
 
 # Adds a sidebar to an image
 def add_sidebar(image, sidebar_width, sidebar_color):
     sidebar = np.full((image.shape[0], sidebar_width, 3), sidebar_color, dtype=np.uint8)
     return np.concatenate((sidebar, image), axis=1)
+
 
 def main():
     # Initialization
@@ -28,7 +30,7 @@ def main():
     hand_classifier = HandClassifier()
     cmd_process = GestureCommandProcessor()
     draw = Draw()
-    cap = cv.VideoCapture(0)  
+    cap = cv.VideoCapture(0)
     cvFpsCalc = CvFpsCalc(buffer_len=10)
 
     # Variables for gesture tracking
@@ -37,12 +39,12 @@ def main():
     prev_mode = None
 
     while True:
-        fps = cvFpsCalc.get()  
-        ret, frame = cap.read()  
+        fps = cvFpsCalc.get()
+        ret, frame = cap.read()
         frame = add_sidebar(frame, 300, (224, 230, 241))
         if not ret:
             break
-        
+
         # Hand detection and drawing
         landmarks, bboxes, results, dy_landmark_list = hand_detector.detect(frame)
         hand_detector.draw_bounding_rect(frame, bboxes)
@@ -60,14 +62,20 @@ def main():
 
             # Dynamic gesture processing
             if current_mode == "Formation":
-                point_history.append(dy_landmark_list[8] if hand_sign_id in [16, 2] else [0, 0])
-                
+                point_history.append(
+                    dy_landmark_list[8] if hand_sign_id in [16, 2] else [0, 0]
+                )
+
                 # Finger gesture classification
-                finger_gesture_id = hand_classifier.dynamic_classify(point_history, frame, len(point_history))
+                finger_gesture_id = hand_classifier.dynamic_classify(
+                    point_history, frame, len(point_history)
+                )
                 if finger_gesture_id:
                     finger_gesture_history.append(finger_gesture_id)
                     most_common_fg_id = Counter(finger_gesture_history).most_common(1)
-                    cmd = hand_classifier.point_history_classifier_labels[most_common_fg_id[0][0]]
+                    cmd = hand_classifier.point_history_classifier_labels[
+                        most_common_fg_id[0][0]
+                    ]
                 else:
                     cmd = command
 
@@ -78,9 +86,9 @@ def main():
         else:
             point_history.append([0, 0])
             current = prev_mode
-        
+
         # Rendering visual feedback on the frame
-        draw.real_time_score(frame, bboxes, cmd, score) 
+        draw.real_time_score(frame, bboxes, cmd, score)
         draw.show_fps(frame, fps)
         draw.gesture_UI(frame, current, cmd)
         draw.human_UI(frame)
@@ -95,6 +103,7 @@ def main():
 
     cap.release()
     cv.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()

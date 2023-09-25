@@ -14,5 +14,3 @@ hand_recognition/
 ├── process_cmd.py
 └── hand.py*
 ```
-
-Run code by ```python hand.py```

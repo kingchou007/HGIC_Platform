@@ -4,6 +4,7 @@ from collections import deque, Counter
 from timingdecorator.timeit import timeit
 import time
 
+
 class GestureCommandProcessor:
     def __init__(self):
         # Determine the directory of the current script
@@ -12,12 +13,16 @@ class GestureCommandProcessor:
         command_file = os.path.join(script_dir, "hand_settings.json")
 
         # Load the hand gesture-command mappings from the JSON file
-        with open(command_file, 'r') as f:
+        with open(command_file, "r") as f:
             self.command_dict = json.load(f)
 
         # Extract all the available modes from the command dictionary
-        self.modes = [mode for mode in self.command_dict.keys() if mode not in ["Emergency", "Universal"]]
-        self.current_mode_index = 0 
+        self.modes = [
+            mode
+            for mode in self.command_dict.keys()
+            if mode not in ["Emergency", "Universal"]
+        ]
+        self.current_mode_index = 0
         self.current_mode = "None"
         # Set up a buffer for switch mode gesture detection
         self.switch_buffer = deque(maxlen=25)
@@ -48,21 +53,27 @@ class GestureCommandProcessor:
     def execute_command(self, hand_sign_id):
         """Determines and returns the command associated with the given hand gesture."""
         # Check for emergency commands as they have the highest priority
-        emergency_command = self.command_dict.get("Emergency", {}).get(str(hand_sign_id))
+        emergency_command = self.command_dict.get("Emergency", {}).get(
+            str(hand_sign_id)
+        )
         if emergency_command is not None:
             print(f"Executing emergency command: '{emergency_command}'")
             return emergency_command
 
         # Check for universal commands
-        universal_command = self.command_dict.get("Universal", {}).get(str(hand_sign_id))
+        universal_command = self.command_dict.get("Universal", {}).get(
+            str(hand_sign_id)
+        )
         if universal_command is not None:
             print(f"Executing universal command: '{universal_command}'")
             return universal_command
 
         # Get the command for the current mode
-        current_mode_command = self.command_dict.get(self.current_mode, {}).get(str(hand_sign_id), "None")
+        current_mode_command = self.command_dict.get(self.current_mode, {}).get(
+            str(hand_sign_id), "None"
+        )
         return current_mode_command
-    
+
         # The following print statement seems misplaced; it will never execute due to the return statement above
         elapsed_time = (time.perf_counter() - start_time) * 1000
         print(f"Inference time: {elapsed_time:.5f} ms")

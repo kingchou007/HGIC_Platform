@@ -1,4 +1,8 @@
-# References: https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe
+# Adapted code from:
+# [hand-gesture-recognition-mediapipe]
+# URL: [https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe]
+# License: [Apache v2 license.]
+
 import csv
 import copy
 from model import KeyPointClassifier, PointHistoryClassifier

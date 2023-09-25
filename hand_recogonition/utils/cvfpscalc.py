@@ -1,3 +1,8 @@
+# This part of code copied from:
+# [hand-gesture-recognition-mediapipe]
+# URL: [https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe]
+# License: [Apache v2 license.]
+
 from collections import deque
 import cv2 as cv
 

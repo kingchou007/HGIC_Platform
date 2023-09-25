@@ -12,4 +12,5 @@ hand_recognition/
 ├── hand_detection.py
 ├── hand_classification.py
 ├── process_cmd.py
-└── main.py
+└── hand.py*
+```

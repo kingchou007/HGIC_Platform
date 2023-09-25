@@ -1,3 +1,8 @@
+# Adapted code from:
+# [hand-gesture-recognition-mediapipe]
+# URL: [https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe]
+# License: [Apache v2 license.]
+
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
@@ -27,7 +32,7 @@ class HandDetector:
         self.landmark_drawing_spec = self.mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=4, circle_radius=3)
         self.connection_drawing_spec = self.mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=4, circle_radius=2) 
             
-    #@timeit
+    @timeit
     def detect(self, image):
         """
         Detect hands in the given image.
@@ -40,8 +45,8 @@ class HandDetector:
         """
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         image.flags.writeable = False       
-        results = self.hands.process(image)  # process the image
-        image.flags.writeable = True         # image is now writeable again
+        results = self.hands.process(image) 
+        image.flags.writeable = True        
         bboxes, landmarks, dy_landmark_list = [], [], []
         
         if results.multi_hand_landmarks:
@@ -52,7 +57,7 @@ class HandDetector:
                     landmark_x = min(int(landmark.x * image.shape[1]), image.shape[1] - 1)
                     landmark_y = min(int(landmark.y * image.shape[0]), image.shape[0] - 1)
                     landmark_list.append([landmark_x, landmark_y])
-                dy_landmark_list = landmark_list # Get the dynamic landmarks
+                dy_landmark_list = landmark_list 
                 landmarks.append(landmark_list)
                 bboxes.append(self.calc_bounding_rect(image, hand_landmarks))
 
@@ -86,7 +91,7 @@ class HandDetector:
         """
         for bbox in bboxes:
             x1, y1, x2, y2 = bbox
-            cv.rectangle(image, (x1, y1), (x2, y2), (128,128,0), 2) # 0, 255, 0 = green
+            cv.rectangle(image, (x1, y1), (x2, y2), (128,128,0), 2) 
             
     def draw_landmarks(self, image, results):
         """
@@ -104,8 +109,7 @@ class HandDetector:
                 self.mp_drawing.draw_landmarks(
                     image, 
                     hand_landmarks, 
-                    self.mp_hands.HAND_CONNECTIONS, # draw the connections between the landmarks
-                    self.landmark_drawing_spec,     # landmark drawing spec  
-                    self.connection_drawing_spec    # connection drawing spec
+                    self.mp_hands.HAND_CONNECTIONS,
+                    self.landmark_drawing_spec,      
+                    self.connection_drawing_spec    
                 )
-    

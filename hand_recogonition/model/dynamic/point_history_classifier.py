@@ -1,3 +1,8 @@
+# Code copied from:
+# [hand-gesture-recognition-mediapipe]
+# URL: [https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe]
+# License: [Apache v2 license.]
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -8,7 +13,7 @@ class PointHistoryClassifier(object):
     def __init__(
         self,
         model_path='model/dynamic/point_history_classifier.tflite',
-        # model_path='model/dynamic/RNN_history_classifier.tflite',
+        #model_path='model/dynamic/RNN_history_classifier.tflite',
         score_th=0.5,
         invalid_value=0,
         num_threads=1,

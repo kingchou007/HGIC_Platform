@@ -1,3 +1,4 @@
+# References: https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe
 import csv
 import copy
 from model import KeyPointClassifier, PointHistoryClassifier
@@ -25,7 +26,7 @@ class HandClassifier:
             Tuple: Hand sign ID and confidence score.
         """
         if landmarks:
-            landmark_list = landmarks[0]  # Assuming only one hand
+            landmark_list = landmarks[0]
             pre_processed_landmark_list = self.pre_process_landmark(landmark_list)
             hand_sign_id, confidence_score = self.keypoint_classifier(pre_processed_landmark_list)
             return hand_sign_id, confidence_score

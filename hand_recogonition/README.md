@@ -14,3 +14,5 @@ hand_recognition/
 ├── process_cmd.py
 └── hand.py*
 ```
+
+```python hand.py```

@@ -5,8 +5,7 @@ import numpy as np
 class NavigationController(object):
     def __init__(self):
         self.controller = velocityComputation()
-        self.controller.set_parameters(
-            v_max=10, r_max=5, k_sep=2, k_coh=0.2, k_mig=5)
+        self.controller.set_parameters(v_max=10, r_max=5, k_sep=2, k_coh=0.2, k_mig=5)
 
     def forward(self, desired_distance=10):
         self.controller.move_in_direction(np.array([[desired_distance], [0]]))
@@ -23,9 +22,15 @@ class NavigationController(object):
     def up(self, desired_height=30, speed=10):
         z_cmd = self.controller.get_avg_altitude() - desired_height
         self.controller.execute_for_all_uavs(
-            lambda name: self.controller.client.moveToZAsync(z_cmd, speed, vehicle_name=name))
+            lambda name: self.controller.client.moveToZAsync(
+                z_cmd, speed, vehicle_name=name
+            )
+        )
 
     def down(self, desired_height=20, speed=10):
         z_cmd = self.controller.get_avg_altitude() + desired_height
         self.controller.execute_for_all_uavs(
-            lambda name: self.controller.client.moveToZAsync(z_cmd, speed, vehicle_name=name))
+            lambda name: self.controller.client.moveToZAsync(
+                z_cmd, speed, vehicle_name=name
+            )
+        )

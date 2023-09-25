@@ -15,4 +15,4 @@ hand_recognition/
 └── hand.py*
 ```
 
-```python hand.py```
+Run code by ```python hand.py```

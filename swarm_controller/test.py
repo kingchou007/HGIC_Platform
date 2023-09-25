@@ -12,10 +12,11 @@ origin_x = [0, 2, 4, 0, 2, 4, 0, 2, 4]
 origin_y = [0, 0, 0, -3, -2, -3, 3, 2, 3]
 origin_z = []
 
+
 def get_UAV_pos(client, vehicle_name="SimpleFlight"):
     global origin_x
     global origin_y
-    # global origin_z 
+    # global origin_z
     state = client.simGetGroundTruthKinematics(vehicle_name=vehicle_name)
     x = state.position.x_val
     y = state.position.y_val
@@ -24,7 +25,10 @@ def get_UAV_pos(client, vehicle_name="SimpleFlight"):
     y += origin_y[i - 1]
     pos = np.array([[x], [y]])
     return pos
+
+
 client = airsim.MultirotorClient()
+
 
 def take_off():
     for i in range(9):  # adjust the number based on the number of UAVs
@@ -45,19 +49,23 @@ def take_off():
 
 
 def merge():
-    v_max = 2 
-    r_max = 20 
-    r_repulsion = 2 
-    k_sep = 20  
-    k_coh = 0.5  
-    k_rep = 12  
-    k_mig = 1 
-    d_desired = 3.5 
+    v_max = 2
+    r_max = 20
+    r_repulsion = 2
+    k_sep = 20
+    k_coh = 0.5
+    k_rep = 12
+    k_mig = 1
+    d_desired = 3.5
 
-    pos_mig = np.array([[5], [0]]) 
+    pos_mig = np.array([[5], [0]])
     v_cmd = np.zeros([2, 9])
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     for t in range(500):
@@ -78,20 +86,23 @@ def merge():
                     pos_j = get_UAV_pos(client, vehicle_name=name_j)
                     r_ij = pos_j - pos_i
                     dist = np.linalg.norm(r_ij)
-                    if dist < r_max:  
-                        if dist < r_repulsion:  
-                            v_rep += -k_rep * (r_repulsion - dist) * r_ij / dist 
+                    if dist < r_max:
+                        if dist < r_repulsion:
+                            v_rep += -k_rep * (r_repulsion - dist) * r_ij / dist
                         elif dist < d_desired:
-                            v_sep += -k_sep * (d_desired - dist) * r_ij / dist  
+                            v_sep += -k_sep * (d_desired - dist) * r_ij / dist
                         else:
                             v_coh += k_coh * (dist - d_desired) * r_ij / dist
-            v_sep = v_sep / N_i 
+            v_sep = v_sep / N_i
             v_coh = v_coh / N_i
-            v_cmd[:, i:i + 1] = v_sep + v_coh + v_rep + v_mig
+            v_cmd[:, i : i + 1] = v_sep + v_coh + v_rep + v_mig
 
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)  # 通过API发送速度指令
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )  # 通过API发送速度指令
+
 
 def get_swarm_center():
     for i in range(9):
@@ -104,19 +115,24 @@ def get_swarm_center():
             pos_sum += pos
     pos_mig = pos_sum / 9
     return pos_mig
-    
+
+
 def spread():
     v_max = 2
     r_max = 20
     k_sep = 30
-    k_coh = 1 
+    k_coh = 1
     k_mig = 1
     pos_mig = get_swarm_center()
     v_cmd = np.zeros([2, 9])
 
     # get average height of all UAVs
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     # Main loop to control UAVs
@@ -140,11 +156,13 @@ def spread():
                         v_coh += k_coh * r_ij
             v_sep = v_sep / N_i
             v_coh = v_coh / N_i
-            v_cmd[:, i:i + 1] = v_sep + v_coh + v_mig
+            v_cmd[:, i : i + 1] = v_sep + v_coh + v_mig
 
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
 
 def flocking():
@@ -154,8 +172,12 @@ def flocking():
 # basic movement
 def left():
     v_max = 5  # adjust maximum velocity to the left
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     # Main loop to control UAVs
@@ -172,12 +194,19 @@ def left():
 
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
-        
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
+
 def right():
     v_max = 5
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     for t in range(300):
@@ -189,13 +218,19 @@ def right():
             v_cmd[1, i] = v_max
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
 
 def up():
     v_max = 60  # adjust maximum velocity upwards
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd) - v_max
 
     # Main loop to control UAVs
@@ -215,13 +250,19 @@ def up():
         # move all UAVs with the calculated velocity commands
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
 
 def down():
     v_max = 5  # adjust maximum velocity upwards
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
 
     # Main loop to control UAVs
     for t in range(200):
@@ -234,13 +275,19 @@ def down():
             z_cmd[i] = v_max
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityAsync(v_cmd[0, i], v_cmd[1, i], z_cmd[i], 0.1, vehicle_name=name_i)
+            client.moveByVelocityAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd[i], 0.1, vehicle_name=name_i
+            )
 
 
 def forward():
     v_max = 5
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     for t in range(300):
@@ -252,13 +299,19 @@ def forward():
             v_cmd[1, i] = 0
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
 
 def backward():
     v_max = 5
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     for t in range(300):
@@ -270,7 +323,10 @@ def backward():
             v_cmd[1, i] = 0
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
 
 def fly_circle():
     v_max = 2
@@ -284,8 +340,12 @@ def fly_circle():
     v_cmd = np.zeros([2, 9])
 
     # get average height of all UAVs
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     # Main loop to control UAVs
@@ -301,7 +361,9 @@ def fly_circle():
             if t < 50:
                 # Temporary separation behavior with collision avoidance and repulsion zone
                 separation_radius = 5  # Radius for temporary separation
-                separation_center = np.array([[0], [10]])  # Center point for temporary separation
+                separation_center = np.array(
+                    [[0], [10]]
+                )  # Center point for temporary separation
                 repulsion_radius = 2  # Radius of the repulsion zone
 
                 v_sep_temp = np.zeros([2, 1])  # Temporary separation velocity
@@ -315,11 +377,18 @@ def fly_circle():
                         separation_distance = np.linalg.norm(r_ij)
 
                         if separation_distance < separation_radius:
-                            v_avoid += k_sep * (separation_radius / separation_distance) * (r_ij / separation_distance)
+                            v_avoid += (
+                                k_sep
+                                * (separation_radius / separation_distance)
+                                * (r_ij / separation_distance)
+                            )
 
                         if separation_distance < repulsion_radius:
-                            v_avoid += k_rep * (repulsion_radius / separation_distance) ** 2 * (
-                                        r_ij / separation_distance)
+                            v_avoid += (
+                                k_rep
+                                * (repulsion_radius / separation_distance) ** 2
+                                * (r_ij / separation_distance)
+                            )
 
                 v_sep_temp -= v_avoid
                 v_mig = v_sep_temp
@@ -327,12 +396,17 @@ def fly_circle():
             elif t < 450:
                 # Fixed triangular formation and circular pattern with collision avoidance
                 formation_radius = 20  # Radius of the triangular formation
-                formation_center = np.array([[0], [15]])  # Center point of the triangular formation
-                angle_offset = 2 * np.pi / 3  # Angular offset between UAVs in the triangular formation
+                formation_center = np.array(
+                    [[0], [15]]
+                )  # Center point of the triangular formation
+                angle_offset = (
+                    2 * np.pi / 3
+                )  # Angular offset between UAVs in the triangular formation
 
                 desired_angle = angle_offset * i + angle
                 desired_position = formation_center + formation_radius * np.array(
-                    [[np.cos(desired_angle)], [np.sin(desired_angle)]])
+                    [[np.cos(desired_angle)], [np.sin(desired_angle)]]
+                )
                 v_mig = k_mig * (desired_position - pos_i)
 
                 # Add circular motion
@@ -348,13 +422,19 @@ def fly_circle():
                         separation_distance = np.linalg.norm(r_ij)
 
                         if separation_distance < formation_radius:
-                            v_avoid += k_sep * (formation_radius / separation_distance) * (r_ij / separation_distance)
+                            v_avoid += (
+                                k_sep
+                                * (formation_radius / separation_distance)
+                                * (r_ij / separation_distance)
+                            )
 
                 v_mig += v_avoid
 
             else:
                 # Gradually bring the group closer together
-                target_center = np.array([[0], [0]])  # Target center point for convergence
+                target_center = np.array(
+                    [[0], [0]]
+                )  # Target center point for convergence
                 convergence_speed = 0.1  # Speed of convergence
                 v_mig = k_mig * (target_center - pos_i) * convergence_speed
 
@@ -372,11 +452,13 @@ def fly_circle():
                         v_coh += k_coh * r_ij
             v_sep = v_sep / N_i
             v_coh = v_coh / N_i
-            v_cmd[:, i:i + 1] = v_sep + v_coh + v_mig
+            v_cmd[:, i : i + 1] = v_sep + v_coh + v_mig
 
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
 
 def test():
@@ -385,8 +467,12 @@ def test():
     v_cmd = np.zeros([2, 9])
 
     # get average height of all UAVs
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     # Main loop to control UAVs
@@ -404,23 +490,34 @@ def test():
             # Define the subgroup's center point
             subgroup_center_angle = 2 * np.pi * subgroup / 3
             subgroup_center = circle_radius * np.array(
-                [[np.cos(subgroup_center_angle + angle)], [np.sin(subgroup_center_angle + angle)]])
+                [
+                    [np.cos(subgroup_center_angle + angle)],
+                    [np.sin(subgroup_center_angle + angle)],
+                ]
+            )
 
             # Define the formation points for each UAV within the subgroup
-            formation_radius = 5  # Distance between the UAVs in the triangular formation
-            formation_angle_offset = 2 * np.pi / 3  # Angular offset between UAVs in the triangular formation
+            formation_radius = (
+                5  # Distance between the UAVs in the triangular formation
+            )
+            formation_angle_offset = (
+                2 * np.pi / 3
+            )  # Angular offset between UAVs in the triangular formation
             formation_angle = formation_angle_offset * (i % 3)
             formation_point = subgroup_center + formation_radius * np.array(
-                [[np.cos(formation_angle)], [np.sin(formation_angle)]])
+                [[np.cos(formation_angle)], [np.sin(formation_angle)]]
+            )
 
             # Calculate the desired velocity for each UAV to reach its formation point
             v_mig = k_mig * (formation_point - pos_i)
-            v_cmd[:, i:i + 1] = v_mig
+            v_cmd[:, i : i + 1] = v_mig
 
         # Set the velocity for each UAV
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
 
 def test2():
@@ -433,8 +530,12 @@ def test2():
     repulsion_distance = 3  # Distance at which UAVs start repelling each other
 
     # get average height of all UAVs
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     # Main loop to control UAVs
@@ -452,14 +553,23 @@ def test2():
             # Define the subgroup's center point
             subgroup_center_angle = 2 * np.pi * subgroup / 3
             subgroup_center = circle_radius * np.array(
-                [[np.cos(subgroup_center_angle + angle)], [np.sin(subgroup_center_angle + angle)]])
+                [
+                    [np.cos(subgroup_center_angle + angle)],
+                    [np.sin(subgroup_center_angle + angle)],
+                ]
+            )
 
             # Define the formation points for each UAV within the subgroup
-            formation_radius = 5  # Distance between the UAVs in the triangular formation
-            formation_angle_offset = 2 * np.pi / 3  # Angular offset between UAVs in the triangular formation
+            formation_radius = (
+                5  # Distance between the UAVs in the triangular formation
+            )
+            formation_angle_offset = (
+                2 * np.pi / 3
+            )  # Angular offset between UAVs in the triangular formation
             formation_angle = formation_angle_offset * (i % 3)
             formation_point = subgroup_center + formation_radius * np.array(
-                [[np.cos(formation_angle)], [np.sin(formation_angle)]])
+                [[np.cos(formation_angle)], [np.sin(formation_angle)]]
+            )
 
             # Calculate the desired velocity for each UAV to reach its formation point
             v_mig = k_mig * (formation_point - pos_i)
@@ -475,18 +585,23 @@ def test2():
                         # Calculate a repulsion vector
                         repulsion_vector = pos_i - pos_j
                         # Normalize and scale by the repulsion coefficient
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         # If the distance is below the repulsion distance, scale the repulsion vector further
                         if distance < repulsion_distance:
                             v_rep *= 2
 
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
         # Set the velocity for each UAV
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
 
 def circle_move():
@@ -500,29 +615,44 @@ def circle_move():
 
     # get average height of all UAVs
     # for easy to control, we set the height of all UAVs to be the same
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
     v_rep = np.zeros([2, 1])
 
     # Main loop to control UAVs
     for t in range(600):
-        angle = 2 * np.pi * t / 600  # Angle based on the current time step（we hope have a circle movement）
+        angle = (
+            2 * np.pi * t / 600
+        )  # Angle based on the current time step（we hope have a circle movement）
         group_center_radius = 20  # Set the radius of the circle for the group center
 
         # Calculate the swarm center point
-        group_center = group_center_radius * np.array([[np.cos(angle)], [np.sin(angle)]])
+        group_center = group_center_radius * np.array(
+            [[np.cos(angle)], [np.sin(angle)]]
+        )
 
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            pos_i = get_UAV_pos(client, vehicle_name=name_i)  # store the position of the current UAV
+            pos_i = get_UAV_pos(
+                client, vehicle_name=name_i
+            )  # store the position of the current UAV
 
             # Define the formation points for each UAV within the group
             formation_radius = 5  # Distance between the UAVs in the formation
-            formation_angle_offset = 2 * np.pi / 9  # Angular offset between UAVs in the formation
-            formation_angle = formation_angle_offset * i  # calculates the specific angle for the current UAV based on its index
+            formation_angle_offset = (
+                2 * np.pi / 9
+            )  # Angular offset between UAVs in the formation
+            formation_angle = (
+                formation_angle_offset * i
+            )  # calculates the specific angle for the current UAV based on its index
             formation_point = group_center + formation_radius * np.array(
-                [[np.cos(formation_angle)], [np.sin(formation_angle)]])
+                [[np.cos(formation_angle)], [np.sin(formation_angle)]]
+            )
 
             # Calculate the desired velocity for each UAV to reach its formation point
             v_mig = k_mig * (formation_point - pos_i)
@@ -538,19 +668,25 @@ def circle_move():
                         # Calculate a repulsion vector
                         repulsion_vector = pos_i - pos_j
                         # Normalize and scale by the repulsion coefficient
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         # If the distance is below the repulsion distance, scale the repulsion vector further
                         if distance < repulsion_distance:
                             v_rep *= 2
 
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
         # Set the velocity for each UAV
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
-    
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
+
 def test_obs():
     k_mig = 1
     k_rep = 10
@@ -563,27 +699,39 @@ def test_obs():
     k_obs = 5  # Strength of the repulsive field around obstacles
     obs_dist = 5  # Distance at which the drone starts to "feel" an obstacle
 
-    obstacles = [((15, 30), (40, 60)),  # Obstacle 1
-                 ((45, 60), (0, 10)),  # Obstacle 2
-                 ((-15, -40), (15, 40)),  # Obstacle 3
-                 ((-15, -40), (-20, -40)),  # Obstacle 4
-                 ((10, 30), (-70, -50))]  # Obstacle 5
+    obstacles = [
+        ((15, 30), (40, 60)),  # Obstacle 1
+        ((45, 60), (0, 10)),  # Obstacle 2
+        ((-15, -40), (15, 40)),  # Obstacle 3
+        ((-15, -40), (-20, -40)),  # Obstacle 4
+        ((10, 30), (-70, -50)),
+    ]  # Obstacle 5
 
     z_cmd = np.mean(
-        [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-         range(9)])
+        [
+            client.getMultirotorState(
+                vehicle_name="UAV" + str(i + 1)
+            ).kinematics_estimated.position.z_val
+            for i in range(9)
+        ]
+    )
 
     for t in range(600):
         angle = 2 * np.pi * t / 900
-        group_center = group_center_radius * np.array([[np.cos(angle)], [np.sin(angle)]])
-        team_positions = [get_UAV_pos(client, vehicle_name="UAV" + str(i + 1)) for i in range(9)]
+        group_center = group_center_radius * np.array(
+            [[np.cos(angle)], [np.sin(angle)]]
+        )
+        team_positions = [
+            get_UAV_pos(client, vehicle_name="UAV" + str(i + 1)) for i in range(9)
+        ]
 
         for i in range(9):
             name_i = "UAV" + str(i + 1)
             pos_i = team_positions[i]
             formation_angle = 2 * np.pi * i / 9
             formation_point = group_center + formation_radius * np.array(
-                [[np.cos(formation_angle)], [np.sin(formation_angle)]])
+                [[np.cos(formation_angle)], [np.sin(formation_angle)]]
+            )
             v_mig = k_mig * (formation_point - pos_i)
 
             v_rep = np.zeros([2, 1])
@@ -593,8 +741,11 @@ def test_obs():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
 
@@ -613,14 +764,20 @@ def test_obs():
                     avoidance_vector = obstacle_vector / obstacle_distance
 
                     # Calculate the avoidance direction based on drone's velocity
-                    avoidance_direction = np.sign(np.dot(v_cmd.flatten(), avoidance_vector.flatten()))
+                    avoidance_direction = np.sign(
+                        np.dot(v_cmd.flatten(), avoidance_vector.flatten())
+                    )
 
                     # Gradual transition for smoother avoidance behavior
-                    transition_factor = 1 / (1 + np.exp((obstacle_distance - obs_dist) / 2))
+                    transition_factor = 1 / (
+                        1 + np.exp((obstacle_distance - obs_dist) / 2)
+                    )
 
                     # Smoothly adjust avoidance direction
                     avoidance_vector = (
-                                                   1 - transition_factor) * avoidance_vector + transition_factor * avoidance_direction * v_cmd
+                        (1 - transition_factor) * avoidance_vector
+                        + transition_factor * avoidance_direction * v_cmd
+                    )
 
                     # Apply weight based on obstacle distance
                     avoidance_weight = 1 / obstacle_distance
@@ -633,7 +790,10 @@ def test_obs():
             # if np.linalg.norm(v_cmd) > max_speed:
             #     v_cmd = max_speed * (v_cmd / np.linalg.norm(v_cmd))
 
-            client.moveByVelocityZAsync(v_cmd[0, 0], v_cmd[1, 0], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, 0], v_cmd[1, 0], z_cmd, 0.1, vehicle_name=name_i
+            )
+
 
 def circle_move_with_obstacles():  ### this one is working
     k_mig = 0.5
@@ -645,37 +805,54 @@ def circle_move_with_obstacles():  ### this one is working
     repulsion_distance = 1.5  # Distance at which UAVs start repelling each other
     feel_distance = 5  # Distance at which UAVs start sensing obstacles
 
-    obstacles = [((15, 30), (40, 60)),  # Obstacle 1
-                 ((45, 60), (0, 10)),  # Obstacle 2
-                 ((-15, -40), (15, 40)),  # Obstacle 3
-                 ((-15, -40), (-20, -40)),  # Obstacle 4
-                 ((10, 30), (-70, -50))]  # Obstacle 5
+    obstacles = [
+        ((15, 30), (40, 60)),  # Obstacle 1
+        ((45, 60), (0, 10)),  # Obstacle 2
+        ((-15, -40), (15, 40)),  # Obstacle 3
+        ((-15, -40), (-20, -40)),  # Obstacle 4
+        ((10, 30), (-70, -50)),
+    ]  # Obstacle 5
 
     # get average height of all UAVs
     # for easy to control, we set the height of all UAVs to be the same
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
     v_rep = np.zeros([2, 1])
 
     # Main loop to control UAVs
     for t in range(600):
-        angle = 2 * np.pi * t / 600  # Angle based on the current time step（we hope have a circle movement）
+        angle = (
+            2 * np.pi * t / 600
+        )  # Angle based on the current time step（we hope have a circle movement）
         group_center_radius = 20  # Set the radius of the circle for the group center
 
         # Calculate the swarm center point
-        group_center = group_center_radius * np.array([[np.cos(angle)], [np.sin(angle)]])
+        group_center = group_center_radius * np.array(
+            [[np.cos(angle)], [np.sin(angle)]]
+        )
 
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            pos_i = get_UAV_pos(client, vehicle_name=name_i)  # store the position of the current UAV
+            pos_i = get_UAV_pos(
+                client, vehicle_name=name_i
+            )  # store the position of the current UAV
 
             # Define the formation points for each UAV within the group
             formation_radius = 5  # Distance between the UAVs in the formation
-            formation_angle_offset = 2 * np.pi / 9  # Angular offset between UAVs in the formation
-            formation_angle = formation_angle_offset * i  # calculates the specific angle for the current UAV based on its index
+            formation_angle_offset = (
+                2 * np.pi / 9
+            )  # Angular offset between UAVs in the formation
+            formation_angle = (
+                formation_angle_offset * i
+            )  # calculates the specific angle for the current UAV based on its index
             formation_point = group_center + formation_radius * np.array(
-                [[np.cos(formation_angle)], [np.sin(formation_angle)]])
+                [[np.cos(formation_angle)], [np.sin(formation_angle)]]
+            )
 
             # Calculate the desired velocity for each UAV to reach its formation point
             v_mig = k_mig * (formation_point - pos_i)
@@ -691,8 +868,11 @@ def circle_move_with_obstacles():  ### this one is working
                         # Calculate a repulsion vector
                         repulsion_vector = pos_i - pos_j
                         # Normalize and scale by the repulsion coefficient
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         # If the distance is below the repulsion distance, scale the repulsion vector further
                         if distance < repulsion_distance:
                             v_rep *= 2
@@ -708,19 +888,27 @@ def circle_move_with_obstacles():  ### this one is working
                     obstacle_direction = obstacle_vector / obstacle_distance
                     # Add repulsion behavior if UAV is close to the obstacle
                     if obstacle_distance < repulsion_distance:
-                        v_repulsion = k_rep * (obstacle_direction / obstacle_distance) * (
-                                    repulsion_distance - obstacle_distance)
+                        v_repulsion = (
+                            k_rep
+                            * (obstacle_direction / obstacle_distance)
+                            * (repulsion_distance - obstacle_distance)
+                        )
                         v_obstacle += v_repulsion
                     else:
-                        v_obstacle += k_rep * (obstacle_direction / obstacle_distance) * (
-                                    feel_distance - obstacle_distance)
+                        v_obstacle += (
+                            k_rep
+                            * (obstacle_direction / obstacle_distance)
+                            * (feel_distance - obstacle_distance)
+                        )
 
-            v_cmd[:, i:i + 1] = v_mig + v_rep + v_obstacle
+            v_cmd[:, i : i + 1] = v_mig + v_rep + v_obstacle
 
         # Set the velocity for each UAV
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
     for i in range(9):
         name_i = "UAV" + str(i + 1)
@@ -733,9 +921,11 @@ def cover_block():
     feel_distance_obstacle = 10
 
     safe_distance_uav = 2.5  # Safe distance between UAVs
-    obstacles = [(60, 5),  # Obstacle 1 center point
-                 (20, 60),  # Obstacle 2 center point
-                 (-25, 30)]  # Obstacle 3 center point
+    obstacles = [
+        (60, 5),  # Obstacle 1 center point
+        (20, 60),  # Obstacle 2 center point
+        (-25, 30),
+    ]  # Obstacle 3 center point
 
     repulsion_distance = 15  # Distance at which UAVs repel the center point
     repulsion_distance_uav = 2.5  # Distance at which UAVs repel each other
@@ -745,7 +935,9 @@ def cover_block():
     for t in range(600):
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            pos_i = np.append(get_UAV_pos(client, vehicle_name=name_i)[:2], -40)  # Set x, y, and z-coordinate to -40
+            pos_i = np.append(
+                get_UAV_pos(client, vehicle_name=name_i)[:2], -40
+            )  # Set x, y, and z-coordinate to -40
 
             # Determine the obstacle index for the current UAV
             obstacle_index = i // 3
@@ -758,7 +950,9 @@ def cover_block():
             angle = 2 * np.pi * i / 3
 
             # Calculate the position for the UAV in the circular formation
-            formation_pos = obstacle_center + obstacle_safe_distance * np.array([np.cos(angle), np.sin(angle)])
+            formation_pos = obstacle_center + obstacle_safe_distance * np.array(
+                [np.cos(angle), np.sin(angle)]
+            )
 
             # Calculate the desired velocity for each UAV to reach its formation point
             v_mig = k_mig * (formation_pos[:2] - pos_i[:2])
@@ -768,14 +962,19 @@ def cover_block():
             for j in range(9):
                 if j != i:
                     name_j = "UAV" + str(j + 1)
-                    pos_j = np.append(get_UAV_pos(client, vehicle_name=name_j)[:2],
-                                      -40)  # Set x, y, and z-coordinate to -40
+                    pos_j = np.append(
+                        get_UAV_pos(client, vehicle_name=name_j)[:2], -40
+                    )  # Set x, y, and z-coordinate to -40
                     distance_uav = np.linalg.norm(pos_j - pos_i)
                     if distance_uav < safe_distance_uav:
                         # Calculate the repulsion vector for UAVs
                         repulsion_vector_uav = pos_i[:2] - pos_j[:2]
                         # Scale by the repulsion coefficient and the distance to create repulsion effect
-                        v_rep_uav += k_rep * (safe_distance_uav - distance_uav) * repulsion_vector_uav
+                        v_rep_uav += (
+                            k_rep
+                            * (safe_distance_uav - distance_uav)
+                            * repulsion_vector_uav
+                        )
                         # If the distance is below the repulsion distance, scale the repulsion vector further
                         if distance_uav < repulsion_distance_uav:
                             v_rep_uav *= 2
@@ -785,7 +984,11 @@ def cover_block():
             distance_to_center = np.linalg.norm(pos_i[:2] - obstacle_center)
             if distance_to_center < repulsion_distance:
                 repulsion_vector_obstacle = pos_i[:2] - obstacle_center
-                v_rep_obstacle = k_rep * (repulsion_distance - distance_to_center) * repulsion_vector_obstacle
+                v_rep_obstacle = (
+                    k_rep
+                    * (repulsion_distance - distance_to_center)
+                    * repulsion_vector_obstacle
+                )
 
             # Obstacle avoidance
             v_obstacle = np.zeros(2)
@@ -795,14 +998,19 @@ def cover_block():
                 obstacle_distance = np.linalg.norm(obstacle_vector)
                 if obstacle_distance < feel_distance_obstacle:
                     obstacle_direction = obstacle_center - pos_i[:2]
-                    v_obstacle += k_rep * (obstacle_direction / obstacle_distance) * (
-                                feel_distance_obstacle - obstacle_distance)
+                    v_obstacle += (
+                        k_rep
+                        * (obstacle_direction / obstacle_distance)
+                        * (feel_distance_obstacle - obstacle_distance)
+                    )
 
             # Adjust the desired velocity based on obstacle avoidance
             v_mig += v_rep_uav + v_rep_obstacle + v_obstacle
 
             # Set the velocity for each UAV
-            client.moveByVelocityZAsync(v_mig[0], v_mig[1], -40, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_mig[0], v_mig[1], -40, 0.1, vehicle_name=name_i
+            )
 
 
 def spiral_motion():
@@ -826,25 +1034,33 @@ def spiral_motion():
     for t in range(600):
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            pos_i = np.append(get_UAV_pos(client, vehicle_name=name_i)[:2], -40)  # Set x, y, and z-coordinate to -40
+            pos_i = np.append(
+                get_UAV_pos(client, vehicle_name=name_i)[:2], -40
+            )  # Set x, y, and z-coordinate to -40
 
             # Determine the obstacle index for the current UAV
             obstacle_index = i // 3
 
             # Get the obstacle center point and safe distance for the corresponding index
-            obstacle_center = np.array([obstacles[obstacle_index][0], obstacles[obstacle_index][1], 0])
+            obstacle_center = np.array(
+                [obstacles[obstacle_index][0], obstacles[obstacle_index][1], 0]
+            )
 
             obstacle_safe_distance = safe_distance[obstacle_index]
 
             # Calculate the current height and radius based on the current time step
             current_height = spiral_center_height - t * spiral_increment / 600
-            current_radius = spiral_min_radius + ((spiral_max_radius - spiral_min_radius) * np.sin(np.pi * t / 600))
+            current_radius = spiral_min_radius + (
+                (spiral_max_radius - spiral_min_radius) * np.sin(np.pi * t / 600)
+            )
 
             # Calculate the angle for the spiraling formation
             angle = 2 * np.pi * i / 3 + 2 * np.pi * t / 600
 
             # Calculate the position for the UAV in the spiraling formation
-            formation_pos = obstacle_center + current_radius * np.array([np.cos(angle), np.sin(angle), current_height])
+            formation_pos = obstacle_center + current_radius * np.array(
+                [np.cos(angle), np.sin(angle), current_height]
+            )
 
             # Calculate the desired velocity for each UAV to reach its formation point
             v_mig = k_mig * (formation_pos[:2] - pos_i[:2])
@@ -856,14 +1072,19 @@ def spiral_motion():
             for j in range(9):
                 if j != i:
                     name_j = "UAV" + str(j + 1)
-                    pos_j = np.append(get_UAV_pos(client, vehicle_name=name_j)[:2],
-                                      -40)  # Set x, y, and z-coordinate to -40
+                    pos_j = np.append(
+                        get_UAV_pos(client, vehicle_name=name_j)[:2], -40
+                    )  # Set x, y, and z-coordinate to -40
                     distance_uav = np.linalg.norm(pos_j - pos_i)
                     if distance_uav < safe_distance_uav:
                         # Calculate the repulsion vector for UAVs
                         repulsion_vector_uav = pos_i[:2] - pos_j[:2]
                         # Scale by the repulsion coefficient and the distance to create repulsion effect
-                        v_rep_uav += k_rep * (safe_distance_uav - distance_uav) * repulsion_vector_uav
+                        v_rep_uav += (
+                            k_rep
+                            * (safe_distance_uav - distance_uav)
+                            * repulsion_vector_uav
+                        )
                         # If the distance is below the repulsion distance, scale the repulsion vector further
                         if distance_uav < repulsion_distance_uav:
                             v_rep_uav *= 2
@@ -874,7 +1095,11 @@ def spiral_motion():
 
             if distance_to_center < repulsion_distance:
                 repulsion_vector_obstacle = pos_i[:2] - obstacle_center
-                v_rep_obstacle = k_rep * (repulsion_distance - distance_to_center) * repulsion_vector_obstacle
+                v_rep_obstacle = (
+                    k_rep
+                    * (repulsion_distance - distance_to_center)
+                    * repulsion_vector_obstacle
+                )
 
             # Obstacle avoidance
             v_obstacle = np.zeros(2)
@@ -884,14 +1109,20 @@ def spiral_motion():
                 obstacle_distance = np.linalg.norm(obstacle_vector)
                 if obstacle_distance < feel_distance_obstacle:
                     obstacle_direction = obstacle_center - pos_i[:2]
-                    v_obstacle += k_rep * (obstacle_direction / obstacle_distance) * (
-                                feel_distance_obstacle - obstacle_distance)
+                    v_obstacle += (
+                        k_rep
+                        * (obstacle_direction / obstacle_distance)
+                        * (feel_distance_obstacle - obstacle_distance)
+                    )
 
             # Adjust the desired velocity based on obstacle avoidance
             v_mig += v_rep_uav + v_rep_obstacle + v_obstacle
 
             # Set the velocity and altitude for each UAV
-            client.moveByVelocityZAsync(v_mig[0], v_mig[1], current_height, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_mig[0], v_mig[1], current_height, 0.1, vehicle_name=name_i
+            )
+
 
 def target():
     # Parameters
@@ -922,14 +1153,16 @@ def target():
         # Calculate the distance and direction to the target position
         dx = x - current_pos[0]
         dy = y - current_pos[1]
-        distance = np.sqrt(dx ** 2 + dy ** 2)
+        distance = np.sqrt(dx**2 + dy**2)
 
         # Calculate the velocity components based on the distance and speed
         v_x = -speed * (dx / distance)
         v_y = -speed * (dy / distance)
 
         # Send the command to the UAV
-        client.moveByVelocityZAsync(float(v_x), float(v_y), height, time_step, vehicle_name=name_i)
+        client.moveByVelocityZAsync(
+            float(v_x), float(v_y), height, time_step, vehicle_name=name_i
+        )
 
         # Wait for the next time step
         time.sleep(time_step)
@@ -971,10 +1204,17 @@ def chasing():
             velocity = speed * direction
 
             # Send the command to the chasing UAV
-            client.moveByVelocityZAsync(float(velocity[0]), float(velocity[1]), height, time_step, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                float(velocity[0]),
+                float(velocity[1]),
+                height,
+                time_step,
+                vehicle_name=name_i,
+            )
 
         # Wait for the next time step
         time.sleep(time_step)
+
 
 def target_and_chasing():
     # Parameters
@@ -1010,14 +1250,16 @@ def target_and_chasing():
         # Calculate the distance and direction to the target position
         dx = x - current_pos[0]
         dy = y - current_pos[1]
-        distance = np.sqrt(dx ** 2 + dy ** 2)
+        distance = np.sqrt(dx**2 + dy**2)
 
         # Calculate the velocity components based on the distance and speed
         v_x = -speed * (dx / distance)
         v_y = -speed * (dy / distance)
 
         # Send the command to UAV1
-        client.moveByVelocityZAsync(float(v_x), float(v_y), height, time_step, vehicle_name=target_uav)
+        client.moveByVelocityZAsync(
+            float(v_x), float(v_y), height, time_step, vehicle_name=target_uav
+        )
 
         # Get current position of UAV1
         time.sleep(time_step)
@@ -1044,20 +1286,39 @@ def target_and_chasing():
 
             # Combine the chasing velocity and collision avoidance velocity
 
-            velocity = speed_chasing * direction + repulsion_vectors[toat_uavs.index(name_i)]
+            velocity = (
+                speed_chasing * direction + repulsion_vectors[toat_uavs.index(name_i)]
+            )
             # velocity = speed_chasing * direction
 
             # Send the command to the chasing UAVs
-            client.moveByVelocityZAsync(float(velocity[0]), float(velocity[1]), height, time_step, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                float(velocity[0]),
+                float(velocity[1]),
+                height,
+                time_step,
+                vehicle_name=name_i,
+            )
 
         # Update the angle
         angle += angle_increment
     for i in toat_uavs:
         client.moveByVelocityZAsync(0, 0, height, time_step, vehicle_name=i)
 
+
 def stop_all():
     time_step = 0.1
-    total_uavs = ["UAV1", "UAV2", "UAV3", "UAV4", "UAV5", "UAV6", "UAV7", "UAV8", "UAV9"]
+    total_uavs = [
+        "UAV1",
+        "UAV2",
+        "UAV3",
+        "UAV4",
+        "UAV5",
+        "UAV6",
+        "UAV7",
+        "UAV8",
+        "UAV9",
+    ]
     for i in total_uavs:
         height = get_UAV_pos(client, vehicle_name=i)[2]
         client.moveByVelocityZAsync(0, 0, height, time_step, vehicle_name=i)
@@ -1078,7 +1339,9 @@ def uav_collision():
     repulsion_vectors = []  # List to store the repulsion vectors for each UAV
     for i in range(9):
         name_i = "UAV" + str(i + 1)
-        pos_i = get_UAV_pos(client, vehicle_name=name_i)  # store the position of the current UAV
+        pos_i = get_UAV_pos(
+            client, vehicle_name=name_i
+        )  # store the position of the current UAV
 
         # Collision avoidance
         v_rep = np.zeros([2, 1])
@@ -1091,13 +1354,17 @@ def uav_collision():
                     # Calculate a repulsion vector
                     repulsion_vector = pos_i - pos_j
                     # Normalize and scale by the repulsion coefficient
-                    v_rep += K_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                safe_distance_uav - distance)
+                    v_rep += (
+                        K_rep
+                        * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                        * (safe_distance_uav - distance)
+                    )
                     # If the distance is below the repulsion distance, scale the repulsion vector further
                     if distance < repulsion_distance:
                         v_rep *= 2
         repulsion_vectors.append(v_rep)
     return repulsion_vectors
+
 
 def form_circle():
     # Set the desired formation parameters
@@ -1107,21 +1374,25 @@ def form_circle():
     safe_distance = 2.5
     repulsion_distance = 1.5
     formation_angle_offset = 2 * np.pi / 9
-    
+
     # Define the group center and the repulsion vector
     group_center = np.array([[25], [0]])
     v_rep = np.zeros([2, 1])
 
     # Compute the average height of all UAVs
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     # Define the velocity command
     v_cmd = np.zeros([2, 9])
 
     # Main loop to control UAVs
-    for t in range(500): # assuming 200 time steps are enough to form the circle
+    for t in range(500):  # assuming 200 time steps are enough to form the circle
         for i in range(9):
             # Define the name and position of the current UAV
             name_i = "UAV" + str(i + 1)
@@ -1130,7 +1401,8 @@ def form_circle():
             # Calculate the formation point for the current UAV
             formation_angle = formation_angle_offset * i
             formation_point = group_center + formation_radius * np.array(
-                [[np.cos(formation_angle)], [np.sin(formation_angle)]])
+                [[np.cos(formation_angle)], [np.sin(formation_angle)]]
+            )
 
             # Compute the desired velocity for the current UAV
             v_mig = k_mig * (formation_point - pos_i)
@@ -1147,21 +1419,24 @@ def form_circle():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
 
             # Store the computed velocity command for the current UAV
-            v_cmd[:, i:i + 1] = v_mig + v_rep
-            
-         
-                 
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
         # Command each UAV to move according to the computed velocity command
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
 
 def circle_move_2():
     k_mig = 1
@@ -1170,15 +1445,23 @@ def circle_move_2():
     safe_distance = 2.5  # Safe distance between UAVs
     repulsion_distance = 1.5  # Distance at which UAVs start repelling each other
     group_center_radius = 20  # Set the radius of the circle for the group center
-    z_cmd = [client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val for i in
-             range(9)]
+    z_cmd = [
+        client.getMultirotorState(
+            vehicle_name="UAV" + str(i + 1)
+        ).kinematics_estimated.position.z_val
+        for i in range(9)
+    ]
     z_cmd = np.mean(z_cmd)
 
     # Main loop to control UAVs
     for t in range(600):
-        angle = 2 * np.pi * t / 600  # Angle based on the current time step（we hope have a circle movement）
+        angle = (
+            2 * np.pi * t / 600
+        )  # Angle based on the current time step（we hope have a circle movement）
         # Calculate the swarm center point
-        group_center = group_center_radius * np.array([[np.cos(angle)], [np.sin(angle)]])
+        group_center = group_center_radius * np.array(
+            [[np.cos(angle)], [np.sin(angle)]]
+        )
         for i in range(9):
             name_i = "UAV" + str(i + 1)
             pos_i = get_UAV_pos(client, vehicle_name=name_i)
@@ -1194,26 +1477,32 @@ def circle_move_2():
                     distance = np.linalg.norm(pos_j - pos_i)
 
                     if distance < safe_distance:
-                    # Calculate a repulsion vector
+                        # Calculate a repulsion vector
                         repulsion_vector = pos_i - pos_j
                         # Normalize and scale by the repulsion coefficient, but only if the norm of the repulsion vector is not zero
                         if np.linalg.norm(repulsion_vector) != 0:
-                            v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                                safe_distance - distance)
+                            v_rep += (
+                                k_rep
+                                * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                                * (safe_distance - distance)
+                            )
                             # If the distance is below the repulsion distance, scale the repulsion vector further
                             if distance < repulsion_distance:
                                 v_rep *= 2
 
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
         # Set the velocity for each UAV
         for i in range(9):
             name_i = "UAV" + str(i + 1)
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
 
 def line():
     # Set the desired formation parameters
-    k_mig = 0.5 
+    k_mig = 0.5
     k_rep = 10
     grid_size = 30
     cell_distance = 5
@@ -1225,10 +1514,14 @@ def line():
     v_rep = np.zeros([2, 1])
 
     # Compute the average height of all UAVs
-    z_cmd = np.mean([
-        client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val
-        for i in range(9)
-    ])
+    z_cmd = np.mean(
+        [
+            client.getMultirotorState(
+                vehicle_name="UAV" + str(i + 1)
+            ).kinematics_estimated.position.z_val
+            for i in range(9)
+        ]
+    )
 
     # Define the velocity command
     v_cmd = np.zeros([2, 9])
@@ -1243,7 +1536,11 @@ def line():
             # Calculate the formation point for the current UAV in the grid
             row = i // grid_size
             col = i % grid_size
-            formation_point = group_center + cell_distance * (col - grid_size // 2) * np.array([[1], [0]]) + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            formation_point = (
+                group_center
+                + cell_distance * (col - grid_size // 2) * np.array([[1], [0]])
+                + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            )
 
             # Compute the desired velocity for the current UAV
             v_mig = k_mig * (formation_point - pos_i)
@@ -1260,17 +1557,22 @@ def line():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
 
             # Store the computed velocity command for the current UAV
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
             # Move the UAV using the computed velocity command
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
-    
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
     # Reverse the direction of the scan
     for t in range(500):  # assuming 500 time steps are enough to form the grid
         for i in range(9):
@@ -1281,7 +1583,11 @@ def line():
             # Calculate the formation point for the current UAV in the grid
             row = i // grid_size
             col = (grid_size - 1) - (i % grid_size)
-            formation_point = group_center + cell_distance * (col - grid_size // 2) * np.array([[1], [0]]) + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            formation_point = (
+                group_center
+                + cell_distance * (col - grid_size // 2) * np.array([[1], [0]])
+                + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            )
 
             # Compute the desired velocity for the current UAV
             v_mig = k_mig * (formation_point - pos_i)
@@ -1298,17 +1604,23 @@ def line():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
 
             # Store the computed velocity command for the current UAV
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
             # Move the UAV using the computed velocity command
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
-            
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
+
 def form_grid_formation():
     # Set the desired formation parameters
     k_mig = 0.5
@@ -1320,10 +1632,14 @@ def form_grid_formation():
     repulsion_distance = 1.5  # Distance at which UAVs start repelling each other
 
     # Compute the average height of all UAVs
-    z_cmd = np.mean([
-        client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val
-        for i in range(9)
-    ])
+    z_cmd = np.mean(
+        [
+            client.getMultirotorState(
+                vehicle_name="UAV" + str(i + 1)
+            ).kinematics_estimated.position.z_val
+            for i in range(9)
+        ]
+    )
 
     # Define the velocity command
     v_cmd = np.zeros([2, 9])
@@ -1355,32 +1671,41 @@ def form_grid_formation():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
 
             # Store the computed velocity command for the current UAV
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
             # Move the UAV using the computed velocity command
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name="UAV" + str(i + 1))
-            
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name="UAV" + str(i + 1)
+            )
+
 
 def form_slanted_line_formation():
     # Set the desired formation parameters
     k_mig = 1
     k_rep = 10
     line_length = 9  # Number of UAVs in the line formation
-    line_spacing = 8 # Spacing between UAVs in the line formation
+    line_spacing = 8  # Spacing between UAVs in the line formation
     safe_distance = 5  # Safe distance between UAVs
     repulsion_distance = 5  # Distance at which UAVs start repelling each other
 
     # Compute the average height of all UAVs
-    z_cmd = np.mean([
-        client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val
-        for i in range(9)
-    ])
+    z_cmd = np.mean(
+        [
+            client.getMultirotorState(
+                vehicle_name="UAV" + str(i + 1)
+            ).kinematics_estimated.position.z_val
+            for i in range(9)
+        ]
+    )
 
     # Define the velocity command
     v_cmd = np.zeros([2, 9])
@@ -1392,7 +1717,9 @@ def form_slanted_line_formation():
             pos_i = np.array([[i * line_spacing], [i]])
 
             # Compute the desired velocity for the current UAV
-            v_mig = k_mig * (pos_i - get_UAV_pos(client, vehicle_name="UAV" + str(i + 1)))
+            v_mig = k_mig * (
+                pos_i - get_UAV_pos(client, vehicle_name="UAV" + str(i + 1))
+            )
 
             # Perform collision avoidance
             v_rep = np.zeros([2, 1])
@@ -1405,16 +1732,22 @@ def form_slanted_line_formation():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
 
             # Store the computed velocity command for the current UAV
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
             # Move the UAV using the computed velocity command
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name="UAV" + str(i + 1))
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name="UAV" + str(i + 1)
+            )
+
 
 def left_to_right_scan():
     # Set the desired formation parameters
@@ -1424,10 +1757,14 @@ def left_to_right_scan():
     scan_distance = 60  # Distance covered by the scan
 
     # Compute the average height of all UAVs
-    z_cmd = np.mean([
-        client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val
-        for i in range(9)
-    ])
+    z_cmd = np.mean(
+        [
+            client.getMultirotorState(
+                vehicle_name="UAV" + str(i + 1)
+            ).kinematics_estimated.position.z_val
+            for i in range(9)
+        ]
+    )
 
     # Define the velocity command
     v_cmd = np.zeros([2, 9])
@@ -1455,14 +1792,24 @@ def left_to_right_scan():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < scan_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                scan_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (scan_distance - distance)
+                        )
 
             # Store the computed velocity command for the current UAV
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
             # Move the UAV using the computed velocity command
-            client.moveByVelocityAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, scan_speed, vehicle_name="UAV" + str(i + 1))
+            client.moveByVelocityAsync(
+                v_cmd[0, i],
+                v_cmd[1, i],
+                z_cmd,
+                scan_speed,
+                vehicle_name="UAV" + str(i + 1),
+            )
+
 
 def line_scan():
     # Set the desired formation parameters
@@ -1478,10 +1825,14 @@ def line_scan():
     v_rep = np.zeros([2, 1])
 
     # Compute the average height of all UAVs
-    z_cmd = np.mean([
-        client.getMultirotorState(vehicle_name="UAV" + str(i + 1)).kinematics_estimated.position.z_val
-        for i in range(9)
-    ])
+    z_cmd = np.mean(
+        [
+            client.getMultirotorState(
+                vehicle_name="UAV" + str(i + 1)
+            ).kinematics_estimated.position.z_val
+            for i in range(9)
+        ]
+    )
 
     # Define the velocity command
     v_cmd = np.zeros([2, 9])
@@ -1496,7 +1847,11 @@ def line_scan():
             # Calculate the formation point for the current UAV in the grid
             row = i // grid_size
             col = i % grid_size
-            formation_point = group_center + cell_distance * (col - grid_size // 2) * np.array([[1], [0]]) + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            formation_point = (
+                group_center
+                + cell_distance * (col - grid_size // 2) * np.array([[1], [0]])
+                + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            )
 
             # Compute the desired velocity for the current UAV
             v_mig = k_mig * (formation_point - pos_i)
@@ -1513,16 +1868,21 @@ def line_scan():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
 
             # Store the computed velocity command for the current UAV
-            v_cmd[:, i:i + 1] = v_mig + v_rep
+            v_cmd[:, i : i + 1] = v_mig + v_rep
 
             # Move the UAV using the computed velocity command
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
 
     # Reverse the direction of the scan
     for t in range(500):  # assuming 500 time steps are enough to form the grid
@@ -1534,7 +1894,11 @@ def line_scan():
             # Calculate the formation point for the current UAV in the grid
             row = i // grid_size
             col = (grid_size - 1) - (i % grid_size)
-            formation_point = group_center + cell_distance * (col - grid_size // 2) * np.array([[1], [0]]) + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            formation_point = (
+                group_center
+                + cell_distance * (col - grid_size // 2) * np.array([[1], [0]])
+                + cell_distance * (row - grid_size // 2) * np.array([[0], [1]])
+            )
 
             # Compute the desired velocity for the current UAV
             v_mig = k_mig * (formation_point - pos_i)
@@ -1551,12 +1915,18 @@ def line_scan():
                     distance = np.linalg.norm(pos_j - pos_i)
                     if distance < safe_distance:
                         repulsion_vector = pos_i - pos_j
-                        v_rep += k_rep * (repulsion_vector / np.linalg.norm(repulsion_vector)) * (
-                                    safe_distance - distance)
+                        v_rep += (
+                            k_rep
+                            * (repulsion_vector / np.linalg.norm(repulsion_vector))
+                            * (safe_distance - distance)
+                        )
                         if distance < repulsion_distance:
                             v_rep *= 2
-            v_cmd[:, i:i + 1] = v_mig + v_rep
-            client.moveByVelocityZAsync(v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i)
+            v_cmd[:, i : i + 1] = v_mig + v_rep
+            client.moveByVelocityZAsync(
+                v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
+            )
+
 
 if __name__ == "__main__":
     while True:
@@ -1603,7 +1973,7 @@ if __name__ == "__main__":
             chasing()
         elif command == "tc":
             target_and_chasing()
-        elif command =="fcc":
+        elif command == "fcc":
             form_circle()
         elif command == "fcm":
             circle_move_2()
@@ -1614,4 +1984,4 @@ if __name__ == "__main__":
         elif command == "scan":
             left_to_right_scan()
         elif command == "exit":
-            client.reset() 
+            client.reset()

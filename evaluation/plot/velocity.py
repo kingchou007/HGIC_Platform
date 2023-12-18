@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load the data from the CSV
-name = 'cc_'
-velocity_data = np.loadtxt('cc.csv', delimiter=',')
+name = "cc_"
+velocity_data = np.loadtxt("cc.csv", delimiter=",")
 
 # Extract velocities for X and Y directions
 velocities_x = velocity_data[:, 0::3]
@@ -23,15 +23,19 @@ min_vel_y = np.min(velocities_y, axis=1)
 plt.figure(figsize=(12, 5))
 
 # X velocities
-plt.fill_between(range(avg_vel_x.shape[0]), min_vel_x, max_vel_x, color='lightcoral', alpha=0.3)
-plt.plot(avg_vel_x, color='red', label='X')
+plt.fill_between(
+    range(avg_vel_x.shape[0]), min_vel_x, max_vel_x, color="lightcoral", alpha=0.3
+)
+plt.plot(avg_vel_x, color="red", label="X")
 
 # Y velocities
-plt.fill_between(range(avg_vel_y.shape[0]), min_vel_y, max_vel_y, color='lightgreen', alpha=0.3)
-plt.plot(avg_vel_y, color='green', label='Y')
+plt.fill_between(
+    range(avg_vel_y.shape[0]), min_vel_y, max_vel_y, color="lightgreen", alpha=0.3
+)
+plt.plot(avg_vel_y, color="green", label="Y")
 
 plt.legend(loc="upper right")
 plt.tight_layout()
-plt.grid(True, which='both', linestyle='--', linewidth=1)
-plt.savefig(name+'velocity.png', dpi=600)
+plt.grid(True, which="both", linestyle="--", linewidth=1)
+plt.savefig(name + "velocity.png", dpi=600)
 plt.show()

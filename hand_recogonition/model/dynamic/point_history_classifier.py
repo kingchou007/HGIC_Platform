@@ -13,14 +13,15 @@ import tensorflow as tf
 class PointHistoryClassifier(object):
     def __init__(
         self,
-        model_path='model/dynamic/point_history_classifier.tflite',
-        #model_path='model/dynamic/RNN_history_classifier.tflite',
+        model_path="model/dynamic/point_history_classifier.tflite",
+        # model_path='model/dynamic/RNN_history_classifier.tflite',
         score_th=0.5,
         invalid_value=0,
         num_threads=1,
     ):
-        self.interpreter = tf.lite.Interpreter(model_path=model_path,
-                                               num_threads=num_threads)
+        self.interpreter = tf.lite.Interpreter(
+            model_path=model_path, num_threads=num_threads
+        )
 
         self.interpreter.allocate_tensors()
         self.input_details = self.interpreter.get_input_details()
@@ -33,13 +34,13 @@ class PointHistoryClassifier(object):
         self,
         point_history,
     ):
-        input_details_tensor_index = self.input_details[0]['index']
+        input_details_tensor_index = self.input_details[0]["index"]
         self.interpreter.set_tensor(
-            input_details_tensor_index,
-            np.array([point_history], dtype=np.float32))
+            input_details_tensor_index, np.array([point_history], dtype=np.float32)
+        )
         self.interpreter.invoke()
 
-        output_details_tensor_index = self.output_details[0]['index']
+        output_details_tensor_index = self.output_details[0]["index"]
 
         result = self.interpreter.get_tensor(output_details_tensor_index)
 

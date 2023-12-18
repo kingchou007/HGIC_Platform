@@ -6,7 +6,6 @@ import timeit
 
 class TaskControl(object):
     def __init__(self):
-
         # Initialize the velocity computation object for task control
 
         self.control = VelocityComputation()

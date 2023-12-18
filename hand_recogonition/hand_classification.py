@@ -10,14 +10,16 @@ from timingdecorator.timeit import timeit
 
 
 class HandClassifier:
-    def __init__(self, static_label_path='./model/static/keypoint_classifier_label.csv',
-                 dynamic_label_path='./model/dynamic/point_history_classifier_label.csv'):
+    def __init__(
+        self,
+        static_label_path="./model/static/keypoint_classifier_label.csv",
+        dynamic_label_path="./model/dynamic/point_history_classifier_label.csv",
+    ):
         self.keypoint_classifier = KeyPointClassifier()
         self.point_history_classifier = PointHistoryClassifier()
         self.keypoint_classifier_labels = self.load_labels(static_label_path)
         self.point_history_classifier_labels = self.load_labels(dynamic_label_path)
 
-    
     def classify(self, landmarks, image):
         """
         Classify a static hand gesture based on landmarks.
@@ -32,7 +34,9 @@ class HandClassifier:
         if landmarks:
             landmark_list = landmarks[0]
             pre_processed_landmark_list = self.pre_process_landmark(landmark_list)
-            hand_sign_id, confidence_score = self.keypoint_classifier(pre_processed_landmark_list)
+            hand_sign_id, confidence_score = self.keypoint_classifier(
+                pre_processed_landmark_list
+            )
             return hand_sign_id, confidence_score
 
         return None, None
@@ -51,11 +55,15 @@ class HandClassifier:
         """
         if point_history:
             dynamic_gesture_id = 0
-            pre_processed_point_history_list = self.pre_process_point_history(image, point_history)
+            pre_processed_point_history_list = self.pre_process_point_history(
+                image, point_history
+            )
             point_history_len = len(pre_processed_point_history_list)
 
             if point_history_len == (history_length * 2):
-                dynamic_gesture_id = self.point_history_classifier(pre_processed_point_history_list)
+                dynamic_gesture_id = self.point_history_classifier(
+                    pre_processed_point_history_list
+                )
             return dynamic_gesture_id
         return None
 
@@ -82,7 +90,7 @@ class HandClassifier:
         Returns:
             List: List of labels.
         """
-        with open(file_path, encoding='utf-8-sig') as f:
+        with open(file_path, encoding="utf-8-sig") as f:
             labels = csv.reader(f)
             labels = [row[0] for row in labels]
         return labels
@@ -107,12 +115,20 @@ class HandClassifier:
             landmark_point[0] -= base_x
             landmark_point[1] -= base_y
 
-        max_value = max(abs(value) for landmark_point in temp_landmark_list for value in landmark_point)
+        max_value = max(
+            abs(value)
+            for landmark_point in temp_landmark_list
+            for value in landmark_point
+        )
 
         def normalize_(n):
             return n / max_value
 
-        temp_landmark_list = [normalize_(value) for landmark_point in temp_landmark_list for value in landmark_point]
+        temp_landmark_list = [
+            normalize_(value)
+            for landmark_point in temp_landmark_list
+            for value in landmark_point
+        ]
 
         return temp_landmark_list
 

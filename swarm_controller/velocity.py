@@ -146,7 +146,6 @@ class VelocityComputation:
                     pos_j = self.get_UAV_pos(vehicle_name=name_j)
 
                     if np.linalg.norm(pos_j - pos_i) < self.r_max:
-
                         v_sep, v_coh, v_rep = self.compute_forces(
                             pos_i, pos_j, rep_dis, safe_dis, add_rep
                         )
@@ -257,7 +256,6 @@ class VelocityComputation:
         trajectories = [[[] for _ in range(700)] for _ in range(self.num_uavs)]
         velocities = [[[] for _ in range(700)] for _ in range(self.num_uavs)]
         for t in range(700):
-
             formation_points = self.point_generator("V", spacing)
 
             v_sep, v_rep, v_coh, N_i = 0, 0, 0, 0
@@ -543,7 +541,6 @@ class VelocityComputation:
             )
 
             for i in range(self.num_uavs):
-
                 name_i = "UAV" + str(i + 1)
                 pos_i = self.get_UAV_pos(
                     vehicle_name=name_i
@@ -755,7 +752,7 @@ class VelocityComputation:
                 v_mig = self.k_mig * r_mig / np.linalg.norm(r_mig)
                 N_i = 0
                 region = vor.point_region[i]
-                
+
                 if not -1 in vor.regions[region]:
                     polygon = [vor.vertices[j] for j in vor.regions[region]]
                     centroid = np.mean(polygon, axis=0)

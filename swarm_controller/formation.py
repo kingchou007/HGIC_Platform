@@ -23,41 +23,45 @@ class FormationController(object):
     def merge(self):
         """Merge the formation."""
         self.control.set_parameters(
-            v_max=3, r_max=20, k_sep=1.7, k_coh=0.5, k_mig=1, k_rep=9, r_repulsion=8)
+            v_max=3, r_max=20, k_sep=1.7, k_coh=0.5, k_mig=1, k_rep=9, r_repulsion=8
+        )
         self.control.pos_mig = self.control.get_swarm_center()
         self.run_loop(True, 8, 5, 500)
 
     def spread(self):
         """Spread the formation."""
-        self.control.set_parameters(
-            v_max=15, r_max=20, k_sep=35, k_coh=1.3, k_mig=1)
+        self.control.set_parameters(v_max=15, r_max=20, k_sep=35, k_coh=1.3, k_mig=1)
         self.control.pos_mig = self.control.get_swarm_center()
         self.run_loop(False, 0, 0, 300)
 
     def circle(self):
         """Make the drones form a circle."""
         self.control.set_parameters(
-            v_max=20, r_max=25, k_mig=2, k_rep=25, k_sep=15, k_coh=0.1)
+            v_max=20, r_max=25, k_mig=2, k_rep=25, k_sep=15, k_coh=0.1
+        )
         self.control.pos_mig = self.control.get_swarm_center()
         self.control.form_circle(10, 10)
 
     def line(self):
         """Make the drones form a line."""
         self.control.set_parameters(
-            v_max=20, r_max=25, k_mig=2, k_rep=25, k_sep=15, k_coh=0.1)
+            v_max=20, r_max=25, k_mig=2, k_rep=25, k_sep=15, k_coh=0.1
+        )
         self.control.pos_mig = self.control.get_swarm_center()
         self.control.form_line(13, 7)
 
     def V_formation(self):
         """Make the drones form a V-formation."""
         self.control.set_parameters(
-            v_max=20, r_max=25, k_mig=2, k_rep=25, k_sep=15, k_coh=0.1)
+            v_max=20, r_max=25, k_mig=2, k_rep=25, k_sep=15, k_coh=0.1
+        )
         self.control.form_V(10, 7)
 
     def diagonal(self):
         """Make the drones form a diagonal."""
         self.control.set_parameters(
-            v_max=12, r_max=25, k_mig=1, k_rep=25, k_sep=0.3, k_coh=0.02)
+            v_max=12, r_max=25, k_mig=1, k_rep=25, k_sep=0.3, k_coh=0.02
+        )
         for _ in range(600):
             self.control.form_diagonal(13, 8)
             self.move_UAVs(self.z_cmd)
@@ -73,6 +77,7 @@ class FormationController(object):
         """Print density information for debugging."""
         info = self.control.compute_density()
         print("Density: ", info)
+
 
 # Uncomment below lines to test and time consuming specific formations
 # def time_function(func):

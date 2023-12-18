@@ -101,7 +101,7 @@ def merge():
             name_i = "UAV" + str(i + 1)
             client.moveByVelocityZAsync(
                 v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
-            ) 
+            )
 
 
 def get_swarm_center():
@@ -163,6 +163,7 @@ def spread():
             client.moveByVelocityZAsync(
                 v_cmd[0, i], v_cmd[1, i], z_cmd, 0.1, vehicle_name=name_i
             )
+
 
 # basic movement
 def left():

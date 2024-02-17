@@ -2,7 +2,7 @@
 
 # HGIC: A Hand Gesture Based Interactive Control System for Efficient and Scalable Multi-UAV Operationss
 
-This repository contains the code for the paper "HGIC"
+This repository contains the code for the paper [HGIC](https://sites.bu.edu/mrs2023/program/list-of-accepted-papers-and-presentations/)
 
 ## Code Structure
 

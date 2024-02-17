@@ -16,7 +16,7 @@ This repository contains the code for the paper "HGIC"
 
 * Install by running the following command.
   ```sh
-  git clone https://github.com/CRAI-KSU/HGIC
+  git clone https://github.com/kingchou007/HGIC_Platform
   ```
 * Environment
   ```sh

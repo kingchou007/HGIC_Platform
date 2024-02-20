@@ -17,7 +17,7 @@ This repository contains the code for the paper [HGIC](https://sites.bu.edu/mrs2
   ```sh
   ./run.sh
   ```
-* or
+or ...
 
 * Install by running the following command.
   ```sh

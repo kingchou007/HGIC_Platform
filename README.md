@@ -13,6 +13,11 @@ This repository contains the code for the paper [HGIC](https://sites.bu.edu/mrs2
 <!-- GETTING STARTED -->
 
 ## Requirements
+* Plase run this script
+  ```sh
+  ./run.sh
+  ```
+* or
 
 * Install by running the following command.
   ```sh

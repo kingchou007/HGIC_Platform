@@ -29,12 +29,6 @@ Please follow the instructions in the [AirSim](https://microsoft.github.io/AirSi
 Once you have installed the AirSim simulator, please replace the `settings.json` file in the `Documents/AirSim` folder with the `settings.json` file in the `AirSim` folder in this repository.
 
 ## Running the Code
-* Plase run this script
-  ```sh
-  ./run.sh
-  ```
-or ...
-
 Please open the AirSim simulator. Then, Open two terminals and run the following commands in each terminal.
 
 Terminal 1:

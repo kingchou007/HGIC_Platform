@@ -1,8 +1,8 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 # HGIC: A Hand Gesture Based Interactive Control System for Efficient and Scalable Multi-UAV Operationss
-
-This repository contains the code for the paper [HGIC](https://sites.bu.edu/mrs2023/program/list-of-accepted-papers-and-presentations/)
+Mengsha Hu, Jinzhou Li, Runxiang Jin, Chao Shi, Lei Xu, Rui Liu
+This repository contains the code for the paper [HGIC](https://arxiv.org/abs/2403.05478)
 
 ## Code Structure
 

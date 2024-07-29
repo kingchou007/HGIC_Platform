@@ -4,6 +4,7 @@
 
 Mengsha Hu, Jinzhou Li, Runxiang Jin, Chao Shi, Lei Xu, Rui Liu
 
+![example](img/example.png)
 
 This repository contains the code for the paper [HGIC](https://arxiv.org/abs/2403.05478)
 

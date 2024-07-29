@@ -1,7 +1,10 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 # HGIC: A Hand Gesture Based Interactive Control System for Efficient and Scalable Multi-UAV Operationss
+
 Mengsha Hu, Jinzhou Li, Runxiang Jin, Chao Shi, Lei Xu, Rui Liu
+
+
 This repository contains the code for the paper [HGIC](https://arxiv.org/abs/2403.05478)
 
 ## Code Structure
@@ -13,6 +16,7 @@ This repository contains the code for the paper [HGIC](https://arxiv.org/abs/240
 <!-- GETTING STARTED -->
 
 ## Requirements
+
 * Install by running the following command.
   ```sh
   git clone https://github.com/kingchou007/HGIC_Platform
@@ -29,6 +33,7 @@ Please follow the instructions in the [AirSim](https://microsoft.github.io/AirSi
 Once you have installed the AirSim simulator, please replace the `settings.json` file in the `Documents/AirSim` folder with the `settings.json` file in the `AirSim` folder in this repository.
 
 ## Running the Code
+
 Please open the AirSim simulator. Then, Open two terminals and run the following commands in each terminal.
 
 Terminal 1:
